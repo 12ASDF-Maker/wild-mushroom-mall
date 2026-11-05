@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>购物车编辑</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="admin-layout">
+    <!-- 侧边栏 -->
+    <div class="admin-sidebar">
+        <div class="sidebar-logo">商城后台</div>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/yonghu/list}">用户管理</a></li>
+            <li><a th:href="@{/shangpin/list}">商品管理</a></li>
+            <li><a th:href="@{/dingdan/list}">订单管理</a></li>
+            <li><a th:href="@{/guanggao/list}">广告管理</a></li>
+            <li class="active"><a th:href="@{/gouwuche/list}">购物车管理</a></li>
+            <li><a th:href="@{/dingzhi/list}">定制管理</a></li>
+            <li><a th:href="@{/xiaoxi/list}">私信管理</a></li>
+            <li><a th:href="@{/}">返回前台</a></li>
+        </ul>
+    </div>
+    <!-- 主区域 -->
+    <div class="admin-main">
+        <div class="admin-header">
+            <span class="header-title" th:if="${cart != null and cart.id != null}">编辑购物车</span>
+            <span class="header-title" th:if="${cart == null or cart.id == null}">新增购物车</span>
+            <div class="header-user">
+                <span class="user-name" th:text="${session.user != null ? session.user.nickname : '未登录'}">用户</span>
+            </div>
+        </div>
+        <div class="admin-content">
+            <div class="edit-container">
+                <div th:if="${msg != null}" class="alert alert-danger">
+                    <span th:text="${msg}">错误信息</span>
+                </div>
+                <h2>
+                    <span th:if="${cart != null and cart.id != null}">编辑购物车</span>
+                    <span th:if="${cart == null or cart.id == null}">新增购物车</span>
+                </h2>
+                <form th:action="@{/gouwuche/save}" th:object="${cart}" method="post" class="form-horizontal">
+                    <input type="hidden" th:field="*{id}" th:if="*{id != null}"/>
+                    <div class="form-group">
+                        <label>用户ID</label>
+                        <input type="number" class="form-control" th:field="*{userId}" placeholder="请输入用户ID"/>
+                    </div>
+                    <div class="form-group">
+                        <label>商品ID</label>
+                        <input type="number" class="form-control" th:field="*{productId}" placeholder="请输入商品ID"/>
+                    </div>
+                    <div class="form-group">
+                        <label>数量</label>
+                        <input type="number" class="form-control" th:field="*{quantity}" placeholder="请输入购买数量"/>
+                    </div>
+                    <div class="form-group">
+                        <label>状态</label>
+                        <select class="form-control" th:field="*{status}">
+                            <option value="1">在购物车</option>
+                            <option value="0">已移除</option>
+                        </select>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-primary">保存</button>
+                        <a th:href="@{/gouwuche/list}" class="btn btn-default">返回</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

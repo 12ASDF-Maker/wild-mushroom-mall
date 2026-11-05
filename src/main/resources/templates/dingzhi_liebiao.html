@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>定制管理</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- 侧边栏 -->
+        <div class="admin-sidebar">
+            <div class="sidebar-logo">商城后台</div>
+            <ul class="sidebar-menu">
+                <li><a th:href="@{/houtai}">后台首页</a></li>
+                <li><a th:href="@{/yonghu/list}">用户管理</a></li>
+                <li><a th:href="@{/shangpin/list}">商品管理</a></li>
+                <li><a th:href="@{/dingdan/list}">订单管理</a></li>
+                <li><a th:href="@{/guanggao/list}">广告管理</a></li>
+                <li><a th:href="@{/gouwuche/list}">购物车管理</a></li>
+                <li class="active"><a th:href="@{/dingzhi/list}">定制管理</a></li>
+                <li><a th:href="@{/xiaoxi/list}">私信管理</a></li>
+                <li><a th:href="@{/}">返回前台</a></li>
+            </ul>
+        </div>
+        <!-- 主区域 -->
+        <div class="admin-main">
+            <!-- 顶部Header -->
+            <div class="admin-header">
+                <span class="header-title">定制管理</span>
+                <input type="text" class="header-search" placeholder="搜索">
+                <div class="header-user">
+                    <span class="bell">🔔</span>
+                    <span class="user-name" th:text="${session.user != null ? session.user.nickname : '未登录'}">用户</span>
+                </div>
+            </div>
+            <!-- 内容区 -->
+            <div class="admin-content" >
+                <!-- 数据概览卡片 -->
+
+                <!-- 表格容器 -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>定制管理</h3>
+                        <a th:href="@{/dingzhi/add}" class="btn btn-primary btn-sm">新增</a>
+                    </div>
+
+                    <!-- 快速保存表单 - action 指向 /dingzhi/save -->
+                    <div style="background:#f9fafb;border:1px solid #eef;border-radius:8px;padding:16px;margin-bottom:16px;">
+                        <h4 style="margin:0 0 14px;font-size:15px;color:#1B5E20;">快速新增定制需求</h4>
+                        <form th:action="@{/dingzhi/save}" method="post" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+                            <div style="display:flex;flex-direction:column;gap:4px;">
+                                <label style="font-size:12px;color:#666;">用户ID</label>
+                                <input type="number" name="userId" placeholder="用户ID"
+                                       style="width:120px;padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:14px;">
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:4px;">
+                                <label style="font-size:12px;color:#666;">定制商品名</label>
+                                <input type="text" name="productName" placeholder="定制商品名"
+                                       style="width:160px;padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:14px;">
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:4px;">
+                                <label style="font-size:12px;color:#666;">联系电话</label>
+                                <input type="text" name="phone" placeholder="联系电话"
+                                       style="width:140px;padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:14px;">
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:4px;">
+                                <label style="font-size:12px;color:#666;">状态</label>
+                                <select name="status" style="width:120px;padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:14px;">
+                                    <option value="待处理">待处理</option>
+                                    <option value="处理中">处理中</option>
+                                    <option value="已完成">已完成</option>
+                                </select>
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:200px;">
+                                <label style="font-size:12px;color:#666;">需求描述</label>
+                                <input type="text" name="description" placeholder="需求描述"
+                                       style="padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:14px;">
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:200px;">
+                                <label style="font-size:12px;color:#666;">回复</label>
+                                <input type="text" name="reply" placeholder="回复（可选）"
+                                       style="padding:6px 8px;border:1px solid #ddd;border-radius:4px;font-size:14px;">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="padding:7px 20px;">保存</button>
+                        </form>
+                    </div>
+
+                    <div class="table-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>用户ID</th>
+                                    <th>定制商品名</th>
+                                    <th>需求描述</th>
+                                    <th>联系电话</th>
+                                    <th>状态</th>
+                                    <th>回复</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="custom : ${list}">
+                                    <td th:text="${custom.id}">1</td>
+                                    <td th:text="${custom.userId}">0</td>
+                                    <td th:text="${custom.productName}">定制商品名</td>
+                                    <td th:text="${custom.description}">需求描述</td>
+                                    <td th:text="${custom.phone}">联系电话</td>
+                                    <td>
+                                        <span th:if="${custom.status == '待处理'}" class="tag tag-orange">待处理</span>
+                                        <span th:if="${custom.status == '处理中'}" class="tag tag-blue">处理中</span>
+                                        <span th:if="${custom.status == '已完成'}" class="tag tag-green">已完成</span>
+                                    </td>
+                                    <td th:text="${custom.reply}">回复</td>
+                                    <td>
+                                        <a th:href="@{/dingzhi/edit/{id}(id=${custom.id})}" class="btn btn-warning btn-sm">编辑</a>
+                                        <a th:href="@{/dingzhi/delete/{id}(id=${custom.id})}" class="btn btn-danger btn-sm" onclick="return confirm('确定删除吗？')">删除</a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${list == null or list.isEmpty()}">
+                                    <td colspan="8" style="text-align:center;">暂无数据</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 分页器 -->
+                    <div class="pagination">
+                        <span class="page-item">上一页</span>
+                        <span class="page-item active">1</span>
+                        <span class="page-item">下一页</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

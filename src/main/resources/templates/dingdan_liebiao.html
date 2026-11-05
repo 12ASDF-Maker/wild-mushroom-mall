@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>订单管理</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- 侧边栏 -->
+        <div class="admin-sidebar">
+            <div class="sidebar-logo">商城后台</div>
+            <ul class="sidebar-menu">
+                <li><a th:href="@{/houtai}">后台首页</a></li>
+                <li><a th:href="@{/yonghu/list}">用户管理</a></li>
+                <li><a th:href="@{/shangpin/list}">商品管理</a></li>
+                <li class="active"><a th:href="@{/dingdan/list}">订单管理</a></li>
+                <li><a th:href="@{/guanggao/list}">广告管理</a></li>
+                <li><a th:href="@{/gouwuche/list}">购物车管理</a></li>
+                <li><a th:href="@{/dingzhi/list}">定制管理</a></li>
+                <li><a th:href="@{/xiaoxi/list}">私信管理</a></li>
+                <li><a th:href="@{/}">返回前台</a></li>
+            </ul>
+        </div>
+        <!-- 主区域 -->
+        <div class="admin-main">
+            <!-- 顶部Header -->
+            <div class="admin-header">
+                <span class="header-title">订单管理</span>
+                <input type="text" class="header-search" placeholder="搜索">
+                <div class="header-user">
+                    <span class="bell">🔔</span>
+                    <span class="user-name" th:text="${session.user != null ? session.user.nickname : '未登录'}">用户</span>
+                </div>
+            </div>
+            <!-- 内容区 -->
+            <div class="admin-content">
+                <!-- 表格容器 -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>订单管理</h3>
+                        <a th:href="@{/dingdan/add}" class="btn btn-primary btn-sm">新增</a>
+                    </div>
+                    <div class="table-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>订单编号</th>
+                                    <th>用户ID</th>
+                                    <th>总金额</th>
+                                    <th>状态</th>
+                                    <th>收货人</th>
+                                    <th>电话</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="order : ${list}">
+                                    <td th:text="${order.id}">1</td>
+                                    <td th:text="${order.orderNo}">订单编号</td>
+                                    <td th:text="${order.userId}">0</td>
+                                    <td th:text="${order.totalAmount}">0.0</td>
+                                    <td>
+                                        <span th:if="${order.status == '待付款'}" class="tag tag-orange">待付款</span>
+                                        <span th:if="${order.status == '已付款'}" class="tag tag-blue">已付款</span>
+                                        <span th:if="${order.status == '已发货'}" class="tag tag-blue">已发货</span>
+                                        <span th:if="${order.status == '已完成'}" class="tag tag-green">已完成</span>
+                                        <span th:if="${order.status == '已取消'}" class="tag tag-gray">已取消</span>
+                                    </td>
+                                    <td th:text="${order.receiverName}">收货人</td>
+                                    <td th:text="${order.receiverPhone}">电话</td>
+                                    <td>
+                                        <a th:href="@{/dingdan/edit/{id}(id=${order.id})}" class="btn btn-warning btn-sm">编辑</a>
+                                        <a th:href="@{/dingdan/delete/{id}(id=${order.id})}" class="btn btn-danger btn-sm" onclick="return confirm('确定删除吗？')">删除</a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${list == null or list.isEmpty()}">
+                                    <td colspan="8" style="text-align:center;">暂无数据</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 分页器 -->
+                    <div class="pagination">
+                        <span class="page-item">上一页</span>
+                        <span class="page-item active">1</span>
+                        <span class="page-item">下一页</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

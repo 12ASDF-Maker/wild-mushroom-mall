@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 站内消息表Mapper映射文件，对应XiaoxiMapper接口 -->
+<mapper namespace="com.shop.mapper.XiaoxiMapper">
+
+    <!-- 查询全部消息信息 -->
+    <select id="chaxunQuanbu" resultType="com.shop.entity.Xiaoxi">
+        SELECT id, sender_id, receiver_id, content, is_read, create_time
+        FROM `xiaoxi`
+        ORDER BY id DESC
+    </select>
+
+    <!-- 根据消息id查询消息信息 -->
+    <select id="chaxunById" resultType="com.shop.entity.Xiaoxi">
+        SELECT id, sender_id, receiver_id, content, is_read, create_time
+        FROM `xiaoxi`
+        WHERE id = #{id}
+    </select>
+
+    <!-- 查询两个用户之间的聊天记录，双向查询 -->
+    <select id="chaxunLiaotian" resultType="com.shop.entity.Xiaoxi">
+        SELECT id, sender_id, receiver_id, content, is_read, create_time
+        FROM `xiaoxi`
+        WHERE (sender_id = #{senderId} AND receiver_id = #{receiverId})
+           OR (sender_id = #{receiverId} AND receiver_id = #{senderId})
+        ORDER BY id ASC
+    </select>
+
+    <!-- 新增消息信息，id为自增主键不插入 -->
+    <insert id="tianjia">
+        INSERT INTO `xiaoxi` (sender_id, receiver_id, content, is_read, create_time)
+        VALUES (#{senderId}, #{receiverId}, #{content}, #{isRead}, #{createTime})
+    </insert>
+
+    <!-- 修改消息信息，根据id更新 -->
+    <update id="xiugai">
+        UPDATE `xiaoxi`         SET sender_id = #{senderId},
+            receiver_id = #{receiverId},
+            content = #{content},
+            is_read = #{isRead}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据消息id删除消息信息 -->
+    <delete id="shanchuById">
+        DELETE FROM `xiaoxi`
+        WHERE id = #{id}
+    </delete>
+
+</mapper>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 广告表Mapper映射文件，对应GuanggaoMapper接口 -->
+<mapper namespace="com.shop.mapper.GuanggaoMapper">
+
+    <!-- 查询全部广告信息 -->
+    <select id="chaxunQuanbu" resultType="com.shop.entity.Guanggao">
+        SELECT id, title, image_url, link_url, position, status
+        FROM `guanggao`
+    </select>
+
+    <!-- 根据广告id查询广告信息 -->
+    <select id="chaxunById" resultType="com.shop.entity.Guanggao">
+        SELECT id, title, image_url, link_url, position, status
+        FROM `guanggao`
+        WHERE id = #{id}
+    </select>
+
+    <!-- 新增广告信息，id为自增主键不插入 -->
+    <insert id="tianjia">
+        INSERT INTO `guanggao` (title, image_url, link_url, position, status)
+        VALUES (#{title}, #{imageUrl}, #{linkUrl}, #{position}, #{status})
+    </insert>
+
+    <!-- 修改广告信息，根据id更新 -->
+    <update id="xiugai">
+        UPDATE `guanggao`         SET title = #{title},
+            image_url = #{imageUrl},
+            link_url = #{linkUrl},
+            position = #{position},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据广告id删除广告信息 -->
+    <delete id="shanchuById">
+        DELETE FROM `guanggao`
+        WHERE id = #{id}
+    </delete>
+
+</mapper>

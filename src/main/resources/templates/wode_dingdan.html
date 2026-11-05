@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>我的订单 - 山野珍菌商城</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="front-nav">
+        <div class="nav-inner">
+            <a class="logo" th:href="@{/}">山野珍菌商城</a>
+            <ul class="menu">
+                <li><a th:href="@{/}">首页</a></li>
+                <li><a th:href="@{/fenlei}">商品分类</a></li>
+                <li><a th:href="@{/gouwuche/view}">购物车</a></li>
+                <li class="active"><a th:href="@{/wodeDingdan}">我的订单</a></li>
+            </ul>
+            <div class="search-wrap">
+                <input type="text" class="search-box" placeholder="搜索商品">
+                <button class="search-btn">搜索</button>
+            </div>
+            <div class="user-area">
+                <span th:if="${session.user != null}" th:text="${session.user.nickname != null ? session.user.nickname : session.user.username}">用户名</span>
+                <a th:if="${session.user != null and session.user.role == 'admin'}" th:href="@{/houtai}" class="btn-text">后台管理</a>
+                <a th:if="${session.user != null}" th:href="@{/tuichu}" class="btn-text">退出</a>
+                <a th:if="${session.user == null}" th:href="@{/denglu}" class="btn-text">登录</a>
+                <a th:if="${session.user == null}" th:href="@{/zhuce}" class="btn-text">注册</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 订单列表 -->
+    <div class="orders-container">
+        <h2>我的订单</h2>
+
+        <!-- 未登录提示 -->
+        <div th:if="${session.user == null}" style="text-align:center;padding:60px;color:#999;">
+            <p style="font-size:48px;margin-bottom:12px;">🔒</p>
+            <p style="font-size:16px;margin-bottom:20px;">请先登录后查看订单</p>
+            <a th:href="@{/denglu}" class="btn btn-warning btn-sm">去登录</a>
+        </div>
+
+        <th:block th:if="${session.user != null}">
+            <!-- 订单状态标签 -->
+            <div class="order-tabs">
+                <div class="tab active" onclick="switchTab(this, 'all')">全部订单</div>
+                <div class="tab" onclick="switchTab(this, '待付款')">待付款</div>
+                <div class="tab" onclick="switchTab(this, '待发货')">待发货</div>
+                <div class="tab" onclick="switchTab(this, '已发货')">已发货</div>
+                <div class="tab" onclick="switchTab(this, '已完成')">已完成</div>
+            </div>
+
+            <!-- 订单列表 - 从数据库读取 -->
+            <div th:if="${orders != null and !orders.isEmpty()}">
+                <div class="order-card" th:each="order : ${orders}" th:attr="data-status=${order.status}">
+                    <div class="order-header">
+                        <span class="order-no">订单号：<span th:text="${order.orderNo}">订单编号</span></span>
+                        <span class="order-time" th:if="${order.createTime != null}" th:text="${order.createTime}">时间</span>
+                        <span class="order-status" th:if="${order.status == '待付款'}" style="color:#F57C00;font-weight:500;">待付款</span>
+                        <span class="order-status" th:if="${order.status == '待发货'}" style="color:#2196F3;font-weight:500;">待发货</span>
+                        <span class="order-status" th:if="${order.status == '已发货'}" style="color:#4CAF50;font-weight:500;">已发货</span>
+                        <span class="order-status" th:if="${order.status == '已完成'}" style="color:#999;font-weight:500;">已完成</span>
+                        <span class="order-status" th:if="${order.status == '已取消'}" style="color:#f44336;font-weight:500;">已取消</span>
+                    </div>
+                    <div class="order-body">
+                        <div class="order-product">
+                            <div class="p-img">🍄</div>
+                            <span class="p-name">山野珍菌订单</span>
+                            <span class="p-qty">共1种商品</span>
+                        </div>
+                        <!-- 物流信息 -->
+                        <div class="order-extra" th:if="${order.status == '已发货' or order.status == '已完成'}">
+                            <div class="extra-item">
+                                <span class="extra-label">物流公司：</span>
+                                <span class="extra-value">顺丰速运</span>
+                            </div>
+                            <div class="extra-item">
+                                <span class="extra-label">运单号码：</span>
+                                <span class="extra-value" th:text="'SF' + ${order.id} + '7890'">SF1234567890</span>
+                            </div>
+                        </div>
+                        <div class="order-extra" th:if="${order.status == '待发货'}">
+                            <div class="extra-item">
+                                <span class="extra-label">物流信息：</span>
+                                <span class="extra-value">商家正在备货，暂未发货</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-footer">
+                        <span class="order-amount">实付 ¥<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">0.00</span></span>
+                        <div class="order-btns">
+                            <!-- 待付款：取消订单 + 立即付款 -->
+                            <a th:if="${order.status == '待付款'}" class="btn btn-default btn-sm" th:href="@{/dingdan/cancel/{id}(id=${order.id})}">取消订单</a>
+                            <a th:if="${order.status == '待付款'}" class="btn btn-warning btn-sm" th:href="@{/dingdan/pay(orderNo=${order.orderNo},amount=${order.totalAmount})}">立即付款</a>
+                            <!-- 待发货：提醒发货 + 联系卖家 -->
+                            <a th:if="${order.status == '待发货'}" class="btn btn-default btn-sm" href="javascript:void(0)" th:data-orderno="${order.orderNo}" onclick="remindShip(this.getAttribute('data-orderno'))">提醒发货</a>
+                            <!-- 已发货：查看物流 + 确认收货 -->
+                            <a th:if="${order.status == '已发货'}" class="btn btn-default btn-sm" href="javascript:void(0)" onclick="viewLogistics()">查看物流</a>
+                            <a th:if="${order.status == '已发货'}" class="btn btn-primary btn-sm" th:href="@{/dingdan/confirm/{id}(id=${order.id})}">确认收货</a>
+                            <!-- 已完成：再次购买 + 评价 -->
+                            <a th:if="${order.status == '已完成'}" class="btn btn-default btn-sm" href="javascript:void(0)" onclick="buyAgain()">再次购买</a>
+                            <a th:if="${order.status == '已完成'}" class="btn btn-warning btn-sm" href="javascript:void(0)" onclick="reviewOrder()">评价</a>
+                            <!-- 所有状态都可以联系卖家 -->
+                            <a class="btn btn-default btn-sm" th:href="@{/xiaoxi/liaotian}">联系卖家</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 无订单提示 -->
+            <div th:if="${orders == null or orders.isEmpty()}" id="noOrder" style="text-align:center;padding:60px;color:#999;">
+                <p style="font-size:48px;margin-bottom:12px;">📦</p>
+                <p style="font-size:16px;margin-bottom:20px;">暂无订单</p>
+                <a th:href="@{/fenlei}" class="btn btn-warning btn-sm">去逛逛</a>
+            </div>
+        </th:block>
+    </div>
+
+    <!-- 页脚 -->
+    <div class="front-footer">
+        <p>山野珍菌商城 &nbsp;|&nbsp; 品质保障 · 新鲜直达 &nbsp;|&nbsp; 客服热线：400-888-8888</p>
+        <p style="margin-top:6px;opacity:0.6;">云南野生菌专营 · 山珍美味 健康生活</p>
+    </div>
+
+    <!-- 评价弹窗 -->
+    <div id="reviewModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:12px;padding:30px;width:480px;max-width:90%;position:relative;">
+            <span onclick="closeReview()" style="position:absolute;top:16px;right:20px;cursor:pointer;font-size:20px;color:#999;">×</span>
+            <h3 style="color:#1B5E20;margin-bottom:20px;">商品评价</h3>
+            <div style="font-size:28px;color:#FFC107;cursor:pointer;margin-bottom:16px;" id="starBox">
+                <span onclick="setStar(1)">★</span><span onclick="setStar(2)">★</span><span onclick="setStar(3)">★</span><span onclick="setStar(4)">★</span><span onclick="setStar(5)">★</span>
+            </div>
+            <textarea class="form-control" rows="4" placeholder="请输入评价内容..." id="reviewText" style="width:100%;margin-bottom:16px;"></textarea>
+            <button class="btn btn-warning btn-block" onclick="submitReview()">提交评价</button>
+        </div>
+    </div>
+
+    <script>
+        // 切换订单状态标签
+        function switchTab(el, status) {
+            var tabs = document.querySelectorAll('.order-tabs .tab');
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            el.classList.add('active');
+
+            var cards = document.querySelectorAll('.order-card');
+            var hasCard = false;
+            for (var i = 0; i < cards.length; i++) {
+                var s = cards[i].getAttribute('data-status');
+                if (status == 'all' || s == status) {
+                    cards[i].style.display = 'block';
+                    hasCard = true;
+                } else {
+                    cards[i].style.display = 'none';
+                }
+            }
+            var noOrder = document.getElementById('noOrder');
+            if (noOrder) {
+                noOrder.style.display = hasCard ? 'none' : 'block';
+            }
+        }
+
+        // 提醒发货
+        function remindShip(orderNo) {
+            alert('已提醒商家尽快发货，商家会在24小时内处理~');
+        }
+
+        // 查看物流
+        function viewLogistics() {
+            alert('📦 物流信息\n\n顺丰速运\n快件已到达【昆明官渡营业点】，正在派送中\n预计今日送达');
+        }
+
+        // 再次购买
+        function buyAgain() {
+            window.location.href = '/fenlei';
+        }
+
+        // 评价
+        var starScore = 5;
+        function reviewOrder() {
+            starScore = 5;
+            setStar(5);
+            document.getElementById('reviewText').value = '';
+            document.getElementById('reviewModal').style.display = 'flex';
+        }
+        function closeReview() {
+            document.getElementById('reviewModal').style.display = 'none';
+        }
+        function setStar(n) {
+            starScore = n;
+            var spans = document.querySelectorAll('#starBox span');
+            for (var i = 0; i < spans.length; i++) {
+                spans[i].style.color = i < n ? '#FFC107' : '#ddd';
+            }
+        }
+        function submitReview() {
+            var text = document.getElementById('reviewText').value.trim();
+            if (!text) { alert('请输入评价内容'); return; }
+            alert('评价提交成功！感谢您的' + starScore + '星好评~');
+            closeReview();
+        }
+        document.getElementById('reviewModal').addEventListener('click', function(e) {
+            if (e.target.id == 'reviewModal') closeReview();
+        });
+    </script>
+</body>
+</html>

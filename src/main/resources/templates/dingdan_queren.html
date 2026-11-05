@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>确认订单 - 山野珍菌商城</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="front-nav">
+        <div class="nav-inner">
+            <a class="logo" th:href="@{/}">山野珍菌商城</a>
+            <ul class="menu">
+                <li><a th:href="@{/}">首页</a></li>
+                <li><a th:href="@{/fenlei}">商品分类</a></li>
+                <li><a th:href="@{/gouwuche/view}">购物车</a></li>
+                <li><a th:href="@{/wodeDingdan}">我的订单</a></li>
+            </ul>
+            <div class="user-area">
+                <span th:if="${session.user != null}" th:text="${session.user.nickname != null ? session.user.nickname : session.user.username}">用户名</span>
+                <a th:if="${session.user != null}" th:href="@{/tuichu}" class="btn-text">退出</a>
+                <a th:if="${session.user == null}" th:href="@{/denglu}" class="btn-text">登录</a>
+                <a th:if="${session.user == null}" th:href="@{/zhuce}" class="btn-text">注册</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 订单确认 -->
+    <div class="orders-container">
+        <h2>确认订单</h2>
+
+        <!-- 提交订单表单 - 创建真实订单到数据库 -->
+        <form th:action="@{/dingdan/create}" method="post" id="orderForm">
+            <!-- 收货地址 -->
+            <div class="order-card">
+                <div class="order-header">
+                    <span style="font-weight:500;color:#333;">收货地址</span>
+                </div>
+                <div class="order-body">
+                    <!-- 已保存地址列表（单选） -->
+                    <div th:if="${addressList != null and !addressList.isEmpty()}" style="padding:10px 0;">
+                        <p style="margin-bottom:10px;color:#666;font-size:14px;">请选择已保存的收货地址：</p>
+                        <div th:each="addr, stat : ${addressList}"
+                             style="display:flex;align-items:flex-start;gap:12px;padding:12px;border:1px solid #eee;border-radius:8px;margin-bottom:8px;cursor:pointer;transition:border-color 0.2s,background 0.2s;"
+                             onmouseover="this.style.borderColor='#F57C00'"
+                             onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='#eee'"
+                             onclick="selectSavedAddress(this)">
+                            <input type="radio" name="addrOption"
+                                   th:attr="data-name=${addr.receiverName},data-phone=${addr.receiverPhone},data-address=${addr.receiverAddress}"
+                                   th:checked="${stat.index == 0}"
+                                   style="margin-top:3px;">
+                            <div style="flex:1;">
+                                <div>
+                                    <strong th:text="${addr.receiverName}">收货人</strong>
+                                    <span th:text="${addr.receiverPhone}" style="margin-left:12px;color:#666;">电话</span>
+                                </div>
+                                <div style="color:#666;font-size:13px;margin-top:4px;" th:text="${addr.receiverAddress}">地址</div>
+                            </div>
+                        </div>
+                        <!-- 新增收货地址选项 -->
+                        <label style="display:flex;align-items:center;gap:12px;padding:12px;border:1px dashed #F57C00;border-radius:8px;cursor:pointer;color:#F57C00;font-size:14px;">
+                            <input type="radio" name="addrOption" onclick="selectNewAddress()" style="margin-top:0;">
+                            <span>+ 新增收货地址</span>
+                        </label>
+                    </div>
+
+                    <!-- 新增收货地址输入框（始终保留，可手动输入） -->
+                    <div id="newAddressBox" style="padding:10px 0;">
+                        <p th:if="${addressList != null and !addressList.isEmpty()}" style="margin-bottom:6px;color:#666;font-size:14px;">手动输入新地址：</p>
+                        <p style="margin-bottom:6px;">
+                            <strong>收货人：</strong>
+                            <input type="text" name="receiverName" id="receiverName" value="" placeholder="请输入收货人姓名" style="border:1px solid #ddd;border-radius:4px;font-size:14px;padding:6px 8px;" required>
+                        </p>
+                        <p style="margin-bottom:6px;">
+                            <strong>手机号：</strong>
+                            <input type="text" name="receiverPhone" id="receiverPhone" value="" placeholder="请输入手机号" style="border:1px solid #ddd;border-radius:4px;font-size:14px;padding:6px 8px;" required>
+                        </p>
+                        <p style="color:#666;font-size:14px;">
+                            <strong>地址：</strong>
+                            <input type="text" name="receiverAddress" id="receiverAddress" value="" placeholder="请输入收货地址" style="border:1px solid #ddd;border-radius:4px;font-size:14px;padding:6px 8px;width:500px;" required>
+                        </p>
+                        <label style="display:flex;align-items:center;gap:6px;margin-top:8px;cursor:pointer;font-size:13px;color:#1B5E20;">
+                            <input type="checkbox" name="saveAddr" value="1" style="margin-top:0;"> 保存此地址，下次直接使用
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商品清单 - 从购物车动态加载 -->
+            <div class="order-card">
+                <div class="order-header">
+                    <span style="font-weight:500;color:#333;">商品清单</span>
+                </div>
+                <div class="order-body">
+                    <div class="order-product" th:each="cart : ${cartList}">
+                        <div class="p-img">
+                            <span th:if="${cart.productImage == null or cart.productImage == ''}">🍄</span>
+                            <img th:if="${cart.productImage != null and cart.productImage != ''}" th:src="${cart.productImage}" alt="" style="width:50px;height:50px;border-radius:8px;object-fit:cover;">
+                        </div>
+                        <span class="p-name" th:text="${cart.productName}">商品名称</span>
+                        <span class="p-qty" th:text="'x' + ${cart.quantity}">x1</span>
+                        <span class="p-price" th:text="'¥' + ${#numbers.formatDecimal(cart.productPrice * cart.quantity, 1, 2)}">¥0.00</span>
+                    </div>
+                    <!-- 购物车为空提示 -->
+                    <div th:if="${cartList == null or cartList.isEmpty()}" style="text-align:center;padding:40px;color:#999;">
+                        <p>购物车为空，请先添加商品</p>
+                        <a th:href="@{/fenlei}" class="btn btn-warning btn-sm" style="margin-top:12px;">去逛逛</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 配送方式 -->
+            <div class="order-card">
+                <div class="order-header">
+                    <span style="font-weight:500;color:#333;">配送方式</span>
+                </div>
+                <div class="order-body">
+                    <div style="padding:10px 0;">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <input type="radio" name="ship" checked> 顺丰速运（冷链配送，1-3天送达） <span style="color:#F57C00;margin-left:auto;">¥10.00</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 发票信息 -->
+            <div class="order-card">
+                <div class="order-header">
+                    <span style="font-weight:500;color:#333;">发票信息</span>
+                </div>
+                <div class="order-body">
+                    <div style="padding:10px 0;">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:8px;">
+                            <input type="radio" name="invoice" checked> 不开发票
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:8px;">
+                            <input type="radio" name="invoice"> 普通电子发票（个人）
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <input type="radio" name="invoice"> 增值税普通发票（企业）
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 金额明细 + 提交 -->
+            <div class="order-card">
+                <div class="order-footer" style="flex-direction:column;align-items:flex-end;gap:10px;padding:16px 20px;">
+                    <div style="width:100%;max-width:300px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px;color:#666;">
+                            <span>商品总额</span>
+                            <span id="goodsTotal">¥0.00</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px;color:#666;">
+                            <span>满减优惠</span>
+                            <span class="discount" id="discountAmount">-¥0.00</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px;color:#666;">
+                            <span>配送费</span>
+                            <span>¥10.00</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid #f0f0f0;">
+                            <span style="font-size:15px;color:#333;">应付总额</span>
+                            <span style="font-size:26px;color:#F57C00;font-weight:bold;" id="finalTotal">¥0.00</span>
+                        </div>
+                    </div>
+                    <!-- 隐藏域传递总金额，JS动态计算 -->
+                    <input type="hidden" name="totalAmount" id="hiddenTotal" value="0">
+                    <div style="display:flex;gap:10px;">
+                        <a th:href="@{/gouwuche/view}" class="btn btn-default">返回购物车</a>
+                        <button type="submit" class="btn btn-warning" style="padding:10px 30px;font-size:15px;">提交订单</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- 页脚 -->
+    <div class="front-footer">
+        <p>山野珍菌商城 &nbsp;|&nbsp; 品质保障 · 新鲜直达 &nbsp;|&nbsp; 客服热线：400-888-8888</p>
+        <p style="margin-top:6px;opacity:0.6;">云南野生菌专营 · 山珍美味 健康生活</p>
+    </div>
+
+    <script th:inline="javascript">
+        // 从Thymeleaf获取购物车数据计算总额
+        var cartData = /*[[${cartList}]]*/ [];
+
+        // 选中已保存的收货地址 - 同步填充隐藏的表单字段
+        function selectSavedAddress(el) {
+            var radio = el.querySelector('input[type=radio]');
+            radio.checked = true;
+            document.getElementById('receiverName').value = radio.getAttribute('data-name') || '';
+            document.getElementById('receiverPhone').value = radio.getAttribute('data-phone') || '';
+            document.getElementById('receiverAddress').value = radio.getAttribute('data-address') || '';
+            document.getElementById('newAddressBox').style.display = 'none';
+
+            // 高亮当前选中项
+            var cards = document.querySelectorAll('input[name="addrOption"]');
+            for (var i = 0; i < cards.length; i++) {
+                var parent = cards[i].parentElement;
+                if (cards[i].checked && parent.tagName != 'LABEL') {
+                    parent.style.borderColor = '#F57C00';
+                    parent.style.background = 'rgba(245,124,0,0.06)';
+                } else if (parent.tagName != 'LABEL') {
+                    parent.style.borderColor = '#eee';
+                    parent.style.background = 'transparent';
+                }
+            }
+        }
+
+        // 选中新增地址 - 清空输入框并显示手动输入区
+        function selectNewAddress() {
+            document.getElementById('receiverName').value = '';
+            document.getElementById('receiverPhone').value = '';
+            document.getElementById('receiverAddress').value = '';
+            document.getElementById('newAddressBox').style.display = 'block';
+            document.getElementById('receiverName').focus();
+        }
+        
+        window.onload = function() {
+            // 初始化地址：若有已保存地址，默认选中第一条并填充表单字段
+            var firstSaved = document.querySelector('input[name="addrOption"][data-name]');
+            if (firstSaved) {
+                firstSaved.checked = true;
+                document.getElementById('receiverName').value = firstSaved.getAttribute('data-name') || '';
+                document.getElementById('receiverPhone').value = firstSaved.getAttribute('data-phone') || '';
+                document.getElementById('receiverAddress').value = firstSaved.getAttribute('data-address') || '';
+                var parent = firstSaved.parentElement;
+                if (parent) {
+                    parent.style.borderColor = '#F57C00';
+                    parent.style.background = 'rgba(245,124,0,0.06)';
+                }
+            }
+
+            var total = 0;
+            for (var i = 0; i < cartData.length; i++) {
+                var item = cartData[i];
+                total += item.productPrice * item.quantity;
+            }
+            
+            // 满减计算
+            var discount = 0;
+            if (total >= 500) {
+                discount = 60;
+            } else if (total >= 300) {
+                discount = 35;
+            } else if (total >= 200) {
+                discount = 20;
+            } else if (total >= 100) {
+                discount = 5;
+            }
+            
+            var ship = 10;
+            var finalTotal = total - discount + ship;
+            
+            document.getElementById('goodsTotal').innerText = '¥' + total.toFixed(2);
+            document.getElementById('discountAmount').innerText = '-¥' + discount.toFixed(2);
+            document.getElementById('finalTotal').innerText = '¥' + Math.max(0, finalTotal).toFixed(2);
+            document.getElementById('hiddenTotal').value = Math.max(0, finalTotal).toFixed(2);
+        };
+    </script>
+</body>
+</html>

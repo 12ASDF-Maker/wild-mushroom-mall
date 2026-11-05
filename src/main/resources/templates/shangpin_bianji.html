@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>商品编辑</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="admin-layout">
+    <!-- 侧边栏 -->
+    <div class="admin-sidebar">
+        <div class="sidebar-logo">商城后台</div>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/yonghu/list}">用户管理</a></li>
+            <li class="active"><a th:href="@{/shangpin/list}">商品管理</a></li>
+            <li><a th:href="@{/dingdan/list}">订单管理</a></li>
+            <li><a th:href="@{/guanggao/list}">广告管理</a></li>
+            <li><a th:href="@{/gouwuche/list}">购物车管理</a></li>
+            <li><a th:href="@{/dingzhi/list}">定制管理</a></li>
+            <li><a th:href="@{/xiaoxi/list}">私信管理</a></li>
+            <li><a th:href="@{/}">返回前台</a></li>
+        </ul>
+    </div>
+    <!-- 主区域 -->
+    <div class="admin-main">
+        <div class="admin-header">
+            <span class="header-title" th:if="${product != null and product.id != null}">编辑商品</span>
+            <span class="header-title" th:if="${product == null or product.id == null}">新增商品</span>
+            <div class="header-user">
+                <span class="user-name" th:text="${session.user != null ? session.user.nickname : '未登录'}">用户</span>
+            </div>
+        </div>
+        <div class="admin-content">
+            <div class="edit-container">
+                <div th:if="${msg != null}" class="alert alert-danger">
+                    <span th:text="${msg}">错误信息</span>
+                </div>
+                <h2>
+                    <span th:if="${product != null and product.id != null}">编辑商品</span>
+                    <span th:if="${product == null or product.id == null}">新增商品</span>
+                </h2>
+                <form th:action="@{/shangpin/save}" th:object="${product}" method="post" class="form-horizontal">
+                    <input type="hidden" th:field="*{id}" th:if="*{id != null}"/>
+                    <div class="form-group">
+                        <label>名称</label>
+                        <input type="text" class="form-control" th:field="*{name}" placeholder="请输入商品名称"/>
+                    </div>
+                    <div class="form-group">
+                        <label>价格</label>
+                        <input type="text" class="form-control" th:field="*{price}" placeholder="请输入商品价格"/>
+                    </div>
+                    <div class="form-group">
+                        <label>库存</label>
+                        <input type="number" class="form-control" th:field="*{stock}" placeholder="请输入库存数量"/>
+                    </div>
+                    <div class="form-group">
+                        <label>分类</label>
+                        <select class="form-control" th:field="*{category}">
+                            <option value="松茸">松茸</option>
+                            <option value="牛肝菌">牛肝菌</option>
+                            <option value="鸡枞菌">鸡枞菌</option>
+                            <option value="竹荪">竹荪</option>
+                            <option value="香菇">香菇</option>
+                            <option value="礼盒专区">礼盒专区</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>描述</label>
+                        <textarea class="form-control" th:field="*{description}" rows="3" placeholder="请输入商品描述"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>图片地址</label>
+                        <input type="text" class="form-control" th:field="*{imageUrl}" placeholder="请输入商品图片地址"/>
+                    </div>
+                    <div class="form-group">
+                        <label>状态</label>
+                        <select class="form-control" th:field="*{status}">
+                            <option value="1">上架</option>
+                            <option value="0">下架</option>
+                        </select>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-primary">保存</button>
+                        <a th:href="@{/shangpin/list}" class="btn btn-default">返回</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

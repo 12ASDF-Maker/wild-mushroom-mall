@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>订单支付 - 山野珍菌商城</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="front-nav">
+        <div class="nav-inner">
+            <a class="logo" th:href="@{/}">山野珍菌商城</a>
+            <ul class="menu">
+                <li><a th:href="@{/}">首页</a></li>
+                <li><a th:href="@{/fenlei}">商品分类</a></li>
+                <li><a th:href="@{/gouwuche/view}">购物车</a></li>
+                <li><a th:href="@{/wodeDingdan}">我的订单</a></li>
+            </ul>
+            <div class="user-area">
+                <span th:if="${session.user != null}" th:text="${session.user.nickname != null ? session.user.nickname : session.user.username}">用户名</span>
+                <a th:if="${session.user != null}" th:href="@{/tuichu}" class="btn-text">退出</a>
+                <a th:if="${session.user == null}" th:href="@{/denglu}" class="btn-text">登录</a>
+                <a th:if="${session.user == null}" th:href="@{/zhuce}" class="btn-text">注册</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 支付页面 -->
+    <div class="orders-container" style="max-width:720px;">
+        <h2>订单支付</h2>
+
+        <!-- 订单号与金额显示 -->
+        <div class="pay-notice">
+            <div class="pay-order-info">
+                <div class="pay-label">订单号</div>
+                <div class="pay-value" id="orderNo" th:text="${orderNo != null ? orderNo : '--'}">--</div>
+            </div>
+            <div class="pay-amount">
+                <span class="pay-cny">¥</span>
+                <span class="pay-money" id="payAmount" th:text="${amount != null ? #numbers.formatDecimal(amount, 1, 2) : '0.00'}">0.00</span>
+            </div>
+        </div>
+
+        <!-- 支付按钮 -->
+        <div style="text-align:center;margin-top:20px;">
+            <button class="btn btn-warning btn-lg" onclick="confirmPay()" id="payBtn" style="padding:14px 60px;font-size:16px;">
+                确认支付 ¥<span id="payBtnAmount" th:text="${amount != null ? #numbers.formatDecimal(amount, 1, 2) : '0.00'}">0.00</span>
+            </button>
+            <div style="margin-top:12px;">
+                <a th:href="@{/wodeDingdan}" style="color:#999;font-size:13px;">稍后支付，返回我的订单</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <div class="front-footer">
+        <p>山野珍菌商城 &nbsp;|&nbsp; 品质保障 · 新鲜直达 &nbsp;|&nbsp; 客服热线：400-888-8888</p>
+        <p style="margin-top:6px;opacity:0.6;">云南野生菌专营 · 山珍美味 健康生活</p>
+    </div>
+
+    <script th:inline="javascript">
+        // 从Thymeleaf获取订单号
+        var orderNo = /*[[${orderNo}]]*/ '';
+
+        // 确认支付 - 支付成功后跳转到付款成功API更新订单状态
+        function confirmPay() {
+            var btn = document.getElementById('payBtn');
+            btn.disabled = true;
+            btn.style.opacity = '0.7';
+            btn.innerText = '支付中...';
+
+            // 模拟支付过程
+            setTimeout(function() {
+                // 跳转到付款成功API，更新订单状态为待发货
+                if (orderNo) {
+                    window.location.href = '/dingdan/paySuccess?orderNo=' + encodeURIComponent(orderNo);
+                } else {
+                    window.location.href = '/wodeDingdan';
+                }
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

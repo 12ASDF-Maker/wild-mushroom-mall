@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 定制需求表Mapper映射文件，对应DingzhiMapper接口 -->
+<mapper namespace="com.shop.mapper.DingzhiMapper">
+
+    <!-- 查询全部定制需求信息 -->
+    <select id="chaxunQuanbu" resultType="com.shop.entity.Dingzhi">
+        SELECT id, user_id, product_name, description, phone, status, create_time, reply
+        FROM `dingzhi`
+        ORDER BY id DESC
+    </select>
+
+    <!-- 根据定制需求id查询定制需求信息 -->
+    <select id="chaxunById" resultType="com.shop.entity.Dingzhi">
+        SELECT id, user_id, product_name, description, phone, status, create_time, reply
+        FROM `dingzhi`
+        WHERE id = #{id}
+    </select>
+
+    <!-- 新增定制需求信息，id为自增主键不插入 -->
+    <insert id="tianjia">
+        INSERT INTO `dingzhi` (user_id, product_name, description, phone, status, create_time, reply)
+        VALUES (#{userId}, #{productName}, #{description}, #{phone}, #{status}, #{createTime}, #{reply})
+    </insert>
+
+    <!-- 修改定制需求信息，根据id更新 -->
+    <update id="xiugai">
+        UPDATE `dingzhi`
+        SET user_id = #{userId},
+            product_name = #{productName},
+            description = #{description},
+            phone = #{phone},
+            status = #{status},
+            create_time = #{createTime},
+            reply = #{reply}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据定制需求id删除定制需求信息 -->
+    <delete id="shanchuById">
+        DELETE FROM `dingzhi`
+        WHERE id = #{id}
+    </delete>
+
+</mapper>

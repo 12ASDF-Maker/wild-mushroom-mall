@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 用户表Mapper映射文件，对应YonghuMapper接口 -->
+<mapper namespace="com.shop.mapper.YonghuMapper">
+
+    <!-- 查询全部用户信息 -->
+    <select id="chaxunQuanbu" resultType="com.shop.entity.Yonghu">
+        SELECT id, username, password, nickname, phone, role, status
+        FROM `yonghu`
+    </select>
+
+    <!-- 根据用户id查询用户信息 -->
+    <select id="chaxunById" resultType="com.shop.entity.Yonghu">
+        SELECT id, username, password, nickname, phone, role, status
+        FROM `yonghu`
+        WHERE id = #{id}
+    </select>
+
+    <!-- 根据用户名查询用户信息，用于登录校验 -->
+    <select id="findByUsername" resultType="com.shop.entity.Yonghu">
+        SELECT id, username, password, nickname, phone, role, status
+        FROM `yonghu`
+        WHERE username = #{username}
+    </select>
+
+    <!-- 新增用户信息，id为自增主键不插入 -->
+    <insert id="tianjia">
+        INSERT INTO `yonghu` (username, password, nickname, phone, role, status)
+        VALUES (#{username}, #{password}, #{nickname}, #{phone}, #{role}, #{status})
+    </insert>
+
+    <!-- 修改用户信息，根据id更新 -->
+    <update id="xiugai">
+        UPDATE `yonghu`         SET username = #{username},
+            password = #{password},
+            nickname = #{nickname},
+            phone = #{phone},
+            role = #{role},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据用户id删除用户信息 -->
+    <delete id="shanchuById">
+        DELETE FROM `yonghu`
+        WHERE id = #{id}
+    </delete>
+
+</mapper>

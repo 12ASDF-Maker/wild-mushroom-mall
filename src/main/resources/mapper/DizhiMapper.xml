@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 用户地址表Mapper映射文件，对应DizhiMapper接口 -->
+<mapper namespace="com.shop.mapper.DizhiMapper">
+
+    <!-- 根据用户id查询该用户的所有地址 -->
+    <select id="chaxunByYonghuId" resultType="com.shop.entity.Dizhi">
+        SELECT id, user_id, receiver_name, receiver_phone, receiver_address, is_default, create_time
+        FROM `dizhi`
+        WHERE user_id = #{userId}
+        ORDER BY is_default DESC, id DESC
+    </select>
+
+    <!-- 根据地址id查询地址信息 -->
+    <select id="chaxunById" resultType="com.shop.entity.Dizhi">
+        SELECT id, user_id, receiver_name, receiver_phone, receiver_address, is_default, create_time
+        FROM `dizhi`
+        WHERE id = #{id}
+    </select>
+
+    <!-- 新增地址信息，id为自增主键不插入 -->
+    <insert id="tianjia">
+        INSERT INTO `dizhi` (user_id, receiver_name, receiver_phone, receiver_address, is_default, create_time)
+        VALUES (#{userId}, #{receiverName}, #{receiverPhone}, #{receiverAddress}, #{isDefault}, #{createTime})
+    </insert>
+
+    <!-- 修改地址信息，根据id更新 -->
+    <update id="xiugai">
+        UPDATE `dizhi`
+        SET user_id = #{userId},
+            receiver_name = #{receiverName},
+            receiver_phone = #{receiverPhone},
+            receiver_address = #{receiverAddress},
+            is_default = #{isDefault},
+            create_time = #{createTime}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据地址id删除地址信息 -->
+    <delete id="shanchuById">
+        DELETE FROM `dizhi`
+        WHERE id = #{id}
+    </delete>
+
+</mapper>

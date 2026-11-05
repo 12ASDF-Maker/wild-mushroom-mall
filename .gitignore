@@ -1,0 +1,31 @@
+# ===== Maven 构建产物 =====
+target/
+
+# ===== IDE 配置文件 =====
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# ===== 系统文件 =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== 日志与临时文件 =====
+*.log
+*.tmp
+
+# ===== 本地课程资料（不纳入开源仓库） =====
+/文档/
+/商品图片/
+/山野珍菌商城_完整代码.txt

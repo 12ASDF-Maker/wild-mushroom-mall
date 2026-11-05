@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户编辑</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="admin-layout">
+    <!-- 侧边栏 -->
+    <div class="admin-sidebar">
+        <div class="sidebar-logo">商城后台</div>
+        <ul class="sidebar-menu">
+            <li class="active"><a th:href="@{/yonghu/list}">用户管理</a></li>
+            <li><a th:href="@{/shangpin/list}">商品管理</a></li>
+            <li><a th:href="@{/dingdan/list}">订单管理</a></li>
+            <li><a th:href="@{/guanggao/list}">广告管理</a></li>
+            <li><a th:href="@{/gouwuche/list}">购物车管理</a></li>
+            <li><a th:href="@{/dingzhi/list}">定制管理</a></li>
+            <li><a th:href="@{/xiaoxi/list}">私信管理</a></li>
+            <li><a th:href="@{/}">返回前台</a></li>
+        </ul>
+    </div>
+    <!-- 主区域 -->
+    <div class="admin-main">
+        <div class="admin-header">
+            <span class="header-title" th:if="${user != null and user.id != null}">编辑用户</span>
+            <span class="header-title" th:if="${user == null or user.id == null}">新增用户</span>
+            <div class="header-user">
+                <span class="user-name" th:text="${session.user != null ? session.user.nickname : '未登录'}">用户</span>
+            </div>
+        </div>
+        <div class="admin-content">
+            <div class="edit-container">
+                <div th:if="${msg != null}" class="alert alert-danger">
+                    <span th:text="${msg}">错误信息</span>
+                </div>
+                <h2>
+                    <span th:if="${user != null and user.id != null}">编辑用户</span>
+                    <span th:if="${user == null or user.id == null}">新增用户</span>
+                </h2>
+                <form th:action="@{/yonghu/save}" th:object="${user}" method="post" class="form-horizontal">
+                    <input type="hidden" th:field="*{id}" th:if="*{id != null}"/>
+                    <div class="form-group">
+                        <label>用户名</label>
+                        <input type="text" class="form-control" th:field="*{username}" placeholder="请输入用户名"/>
+                    </div>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <input type="password" class="form-control" th:field="*{password}" placeholder="请输入密码"/>
+                    </div>
+                    <div class="form-group">
+                        <label>昵称</label>
+                        <input type="text" class="form-control" th:field="*{nickname}" placeholder="请输入昵称"/>
+                    </div>
+                    <div class="form-group">
+                        <label>手机号</label>
+                        <input type="text" class="form-control" th:field="*{phone}" placeholder="请输入手机号"/>
+                    </div>
+                    <div class="form-group">
+                        <label>角色</label>
+                        <select class="form-control" th:field="*{role}">
+                            <option value="admin">管理员</option>
+                            <option value="user">普通用户</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>状态</label>
+                        <select class="form-control" th:field="*{status}">
+                            <option value="1">启用</option>
+                            <option value="0">禁用</option>
+                        </select>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-primary">保存</button>
+                        <a th:href="@{/yonghu/list}" class="btn btn-default">返回</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

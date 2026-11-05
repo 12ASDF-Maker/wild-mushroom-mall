@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户登录 - 野生菌商城</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- 登录容器 -->
+    <div class="auth-container">
+        <div class="auth-box">
+            <h2>用户登录</h2>
+            <!-- 错误提示，msg不为空时显示 -->
+            <div th:if="${msg != null}" class="alert alert-danger">
+                <span th:text="${msg}">错误信息</span>
+            </div>
+            <!-- 登录表单，提交到 /denglu -->
+            <form th:action="@{/denglu}" method="post">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="请输入密码">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">登录</button>
+            </form>
+            <!-- 底部链接，跳转到注册页 -->
+            <div class="auth-link">
+                没有账号？<a th:href="@{/zhuce}">去注册</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

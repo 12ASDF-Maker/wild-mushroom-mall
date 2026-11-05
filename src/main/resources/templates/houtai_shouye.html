@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>后台首页 - 山野珍菌商城</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* 主题色 CSS 变量：深绿 + 橙色 */
+        :root {
+            --theme-green: #1B5E20;
+            --theme-orange: #F57C00;
+        }
+
+        /* 欢迎面板 */
+        .welcome-panel {
+            background: linear-gradient(135deg, var(--theme-green) 0%, #2E7D32 100%);
+            color: #fff;
+            border-radius: 12px;
+            padding: 28px 32px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 16px rgba(27, 94, 32, 0.18);
+        }
+        .welcome-panel .welcome-text h2 {
+            margin: 0 0 8px;
+            font-size: 24px;
+        }
+        .welcome-panel .welcome-text p {
+            margin: 0;
+            opacity: 0.85;
+            font-size: 14px;
+        }
+        .welcome-panel .welcome-icon {
+            font-size: 56px;
+            opacity: 0.9;
+        }
+
+        /* 数据概览卡片 - 6个统计 */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+        .dash-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 22px 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform 0.25s, box-shadow 0.25s;
+            border-left: 4px solid var(--theme-green);
+        }
+        .dash-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+        }
+        .dash-card.accent-orange {
+            border-left-color: var(--theme-orange);
+        }
+        .dash-card .dash-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            background: rgba(27, 94, 32, 0.1);
+            color: var(--theme-green);
+            flex-shrink: 0;
+        }
+        .dash-card.accent-orange .dash-icon {
+            background: rgba(245, 124, 0, 0.12);
+            color: var(--theme-orange);
+        }
+        .dash-card .dash-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .dash-card .dash-label {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 6px;
+        }
+        .dash-card .dash-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .dash-card .dash-value.orange {
+            color: var(--theme-orange);
+        }
+        .dash-card .dash-value.green {
+            color: var(--theme-green);
+        }
+
+        /* 快捷入口 */
+        .quick-entry {
+            background: #fff;
+            border-radius: 12px;
+            padding: 22px 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .quick-entry h3 {
+            margin: 0 0 18px;
+            font-size: 16px;
+            color: var(--theme-green);
+            border-left: 4px solid var(--theme-orange);
+            padding-left: 10px;
+        }
+        .quick-entry-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+        .quick-entry-grid a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 18px 10px;
+            border-radius: 10px;
+            background: #f7f9f7;
+            color: #555;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.25s;
+        }
+        .quick-entry-grid a:hover {
+            background: var(--theme-green);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        .quick-entry-grid a .qe-icon {
+            font-size: 28px;
+        }
+
+        @media (max-width: 1100px) {
+            .dashboard-cards { grid-template-columns: repeat(2, 1fr); }
+            .quick-entry-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- 侧边栏 -->
+        <div class="admin-sidebar">
+            <div class="sidebar-logo">商城后台</div>
+            <ul class="sidebar-menu">
+                <li class="active"><a th:href="@{/houtai}">后台首页</a></li>
+                <li><a th:href="@{/yonghu/list}">用户管理</a></li>
+                <li><a th:href="@{/shangpin/list}">商品管理</a></li>
+                <li><a th:href="@{/dingdan/list}">订单管理</a></li>
+                <li><a th:href="@{/guanggao/list}">广告管理</a></li>
+                <li><a th:href="@{/gouwuche/list}">购物车管理</a></li>
+                <li><a th:href="@{/dingzhi/list}">定制管理</a></li>
+                <li><a th:href="@{/xiaoxi/list}">私信管理</a></li>
+                <li><a th:href="@{/}">返回前台</a></li>
+            </ul>
+        </div>
+        <!-- 主区域 -->
+        <div class="admin-main">
+            <!-- 顶部Header - 显示当前登录用户名 -->
+            <div class="admin-header">
+                <span class="header-title">后台首页</span>
+                <input type="text" class="header-search" placeholder="搜索">
+                <div class="header-user">
+                    <span class="bell">🔔</span>
+                    <span class="user-name" th:text="${session.user != null ? (session.user.nickname != null ? session.user.nickname : session.user.username) : '未登录'}">用户名</span>
+                </div>
+            </div>
+            <!-- 内容区 -->
+            <div class="admin-content">
+                <!-- 欢迎面板 -->
+                <div class="welcome-panel">
+                    <div class="welcome-text">
+                        <h2>欢迎回来，<span th:text="${session.user != null ? (session.user.nickname != null ? session.user.nickname : session.user.username) : '管理员'}">管理员</span>！</h2>
+                        <p>山野珍菌商城后台管理系统 · 今日数据一览</p>
+                    </div>
+                    <div class="welcome-icon">🍄</div>
+                </div>
+
+                <!-- 数据概览卡片 - 6个统计 -->
+                <div class="dashboard-cards">
+                    <div class="dash-card">
+                        <div class="dash-icon">👤</div>
+                        <div class="dash-info">
+                            <div class="dash-label">用户总数</div>
+                            <div class="dash-value green" th:text="${userCount != null ? userCount : 0}">0</div>
+                        </div>
+                    </div>
+                    <div class="dash-card">
+                        <div class="dash-icon">📦</div>
+                        <div class="dash-info">
+                            <div class="dash-label">商品总数</div>
+                            <div class="dash-value green" th:text="${productCount != null ? productCount : 0}">0</div>
+                        </div>
+                    </div>
+                    <div class="dash-card">
+                        <div class="dash-icon">📋</div>
+                        <div class="dash-info">
+                            <div class="dash-label">订单总数</div>
+                            <div class="dash-value green" th:text="${orderCount != null ? orderCount : 0}">0</div>
+                        </div>
+                    </div>
+                    <div class="dash-card accent-orange">
+                        <div class="dash-icon">💰</div>
+                        <div class="dash-info">
+                            <div class="dash-label">销售总额</div>
+                            <div class="dash-value orange" th:text="'¥' + ${totalAmount != null ? #numbers.formatDecimal(totalAmount, 1, 2) : '0.00'}">¥0.00</div>
+                        </div>
+                    </div>
+                    <div class="dash-card accent-orange">
+                        <div class="dash-icon">✅</div>
+                        <div class="dash-info">
+                            <div class="dash-label">上架商品</div>
+                            <div class="dash-value orange" th:text="${onlineCount != null ? onlineCount : 0}">0</div>
+                        </div>
+                    </div>
+                    <div class="dash-card accent-orange">
+                        <div class="dash-icon">📊</div>
+                        <div class="dash-info">
+                            <div class="dash-label">库存总量</div>
+                            <div class="dash-value orange" th:text="${totalStock != null ? totalStock : 0}">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 快捷入口 -->
+                <div class="quick-entry">
+                    <h3>快捷入口</h3>
+                    <div class="quick-entry-grid">
+                        <a th:href="@{/yonghu/list}"><span class="qe-icon">👤</span><span>用户管理</span></a>
+                        <a th:href="@{/shangpin/list}"><span class="qe-icon">📦</span><span>商品管理</span></a>
+                        <a th:href="@{/dingdan/list}"><span class="qe-icon">📋</span><span>订单管理</span></a>
+                        <a th:href="@{/guanggao/list}"><span class="qe-icon">📢</span><span>广告管理</span></a>
+                        <a th:href="@{/gouwuche/list}"><span class="qe-icon">🛒</span><span>购物车管理</span></a>
+                        <a th:href="@{/dingzhi/list}"><span class="qe-icon">🛠️</span><span>定制管理</span></a>
+                        <a th:href="@{/xiaoxi/list}"><span class="qe-icon">✉️</span><span>私信管理</span></a>
+                        <a th:href="@{/}"><span class="qe-icon">🏠</span><span>返回前台</span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

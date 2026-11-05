@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 购物车表Mapper映射文件，对应GouwucheMapper接口 -->
+<mapper namespace="com.shop.mapper.GouwucheMapper">
+
+    <!-- 查询全部购物车信息 -->
+    <select id="chaxunQuanbu" resultType="com.shop.entity.Gouwuche">
+        SELECT id, user_id, product_id, quantity, status, create_time
+        FROM `gouwuche`
+        ORDER BY id DESC
+    </select>
+
+    <!-- 根据购物车id查询购物车信息 -->
+    <select id="chaxunById" resultType="com.shop.entity.Gouwuche">
+        SELECT id, user_id, product_id, quantity, status, create_time
+        FROM `gouwuche`
+        WHERE id = #{id}
+    </select>
+
+    <!-- 根据用户id查询购物车，关联商品表获取商品名称、价格、图片 -->
+    <select id="chaxunByYonghuId" resultType="com.shop.entity.Gouwuche">
+        SELECT g.id, g.user_id, g.product_id, g.quantity, g.status, g.create_time,
+               p.name AS product_name,
+               p.price AS product_price,
+               p.image_url AS product_image
+        FROM `gouwuche` g
+        LEFT JOIN `shangpin` p ON g.product_id = p.id
+        WHERE g.user_id = #{userId} AND g.status = 1
+        ORDER BY g.id DESC
+    </select>
+
+    <!-- 根据用户id和商品id查询购物车项，判断商品是否已在购物车中 -->
+    <select id="chaxunByYonghuShangpin" resultType="com.shop.entity.Gouwuche">
+        SELECT id, user_id, product_id, quantity, status
+        FROM `gouwuche`
+        WHERE user_id = #{userId} AND product_id = #{productId} AND status = 1
+    </select>
+
+    <!-- 新增购物车信息，id为自增主键不插入 -->
+    <insert id="tianjia">
+        INSERT INTO `gouwuche` (user_id, product_id, quantity, status, create_time)
+        VALUES (#{userId}, #{productId}, #{quantity}, #{status}, #{createTime})
+    </insert>
+
+    <!-- 修改购物车信息，根据id更新 -->
+    <update id="xiugai">
+        UPDATE `gouwuche`
+        SET user_id = #{userId},
+            product_id = #{productId},
+            quantity = #{quantity},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 更新购物车数量，根据id只更新数量 -->
+    <update id="gengxinShuliang">
+        UPDATE `gouwuche`
+        SET quantity = #{quantity}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据购物车id删除购物车信息 -->
+    <delete id="shanchuById">
+        DELETE FROM `gouwuche`
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 根据用户id清空购物车（将状态设为0），下单后调用 -->
+    <update id="qingkongByYonghuId">
+        UPDATE `gouwuche`
+        SET status = 0
+        WHERE user_id = #{userId} AND status = 1
+    </update>
+
+</mapper>

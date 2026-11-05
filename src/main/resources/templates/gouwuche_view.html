@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>购物车 - 山野珍菌商城</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="front-nav">
+        <div class="nav-inner">
+            <a class="logo" th:href="@{/}">山野珍菌商城</a>
+            <ul class="menu">
+                <li><a th:href="@{/}">首页</a></li>
+                <li><a th:href="@{/fenlei}">商品分类</a></li>
+                <li class="active"><a th:href="@{/gouwuche/view}">购物车</a></li>
+                <li><a th:href="@{/wodeDingdan}">我的订单</a></li>
+            </ul>
+            <div class="search-wrap">
+                <input type="text" class="search-box" placeholder="搜索商品">
+                <button class="search-btn">搜索</button>
+            </div>
+            <div class="user-area">
+                <span th:if="${session.user != null}" th:text="${session.user.nickname != null ? session.user.nickname : session.user.username}">用户名</span>
+                <a th:if="${session.user != null and session.user.role == 'admin'}" th:href="@{/houtai}" class="btn-text">后台管理</a>
+                <a th:if="${session.user != null}" th:href="@{/tuichu}" class="btn-text">退出</a>
+                <a th:if="${session.user == null}" th:href="@{/denglu}" class="btn-text">登录</a>
+                <a th:if="${session.user == null}" th:href="@{/zhuce}" class="btn-text">注册</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 购物车主内容 -->
+    <div class="cart-container">
+        <h2>我的购物车</h2>
+
+        <!-- 购物车为空提示 -->
+        <div th:if="${cartList == null or cartList.isEmpty()}" style="text-align:center;padding:80px 0;color:#999;">
+            <p style="font-size:48px;margin-bottom:12px;">🛒</p>
+            <p style="font-size:16px;margin-bottom:20px;">购物车空空如也</p>
+            <a th:href="@{/fenlei}" class="btn btn-warning btn-sm">去逛逛</a>
+        </div>
+
+        <!-- 购物车有商品时显示 -->
+        <div class="cart-layout" th:if="${cartList != null and !cartList.isEmpty()}">
+            <!-- 左侧购物车列表 -->
+            <div class="cart-list-wrap">
+                <!-- 表头 -->
+                <div class="cart-header">
+                    <label class="check-all-label">
+                        <input type="checkbox" class="item-check" id="checkAll" checked onchange="toggleAll(this)">
+                        <span>全选</span>
+                    </label>
+                    <span class="col-info">商品信息</span>
+                    <span class="col-price">单价</span>
+                    <span class="col-qty">数量</span>
+                    <span class="col-sub">小计</span>
+                    <span class="col-op">操作</span>
+                </div>
+
+                <!-- 购物车商品列表 - 从数据库动态加载 -->
+                <table class="cart-table" id="cartBody">
+                    <tr class="cart-item" th:each="cart : ${cartList}" th:attr="data-id=${cart.id}">
+                        <td class="col-check">
+                            <input type="checkbox" class="item-check" checked onchange="calcTotal()">
+                        </td>
+                        <td class="col-info">
+                            <div class="p-img">
+                                <span th:if="${cart.productImage == null or cart.productImage == ''}">🍄</span>
+                                <img th:if="${cart.productImage != null and cart.productImage != ''}" th:src="${cart.productImage}" alt="" style="width:60px;height:60px;border-radius:8px;object-fit:cover;">
+                            </div>
+                            <span class="p-name" th:text="${cart.productName}">商品名称</span>
+                        </td>
+                        <td class="col-price" th:attr="data-price=${cart.productPrice}" th:text="'¥' + ${#numbers.formatDecimal(cart.productPrice, 1, 2)}">¥0.00</td>
+                        <td class="col-qty">
+                            <div class="qty-stepper">
+                                <button type="button" class="qty-btn" th:data-id="${cart.id}" onclick="changeQtyLink(parseInt(this.getAttribute('data-id')), -1)">-</button>
+                                <input type="text" class="qty-input" th:value="${cart.quantity}" th:data-id="${cart.id}" oninput="onQtyInput(this)" onblur="calcSub(this)">
+                                <button type="button" class="qty-btn" th:data-id="${cart.id}" onclick="changeQtyLink(parseInt(this.getAttribute('data-id')), 1)">+</button>
+                            </div>
+                        </td>
+                        <td class="col-sub subtotal" th:text="'¥' + ${#numbers.formatDecimal(cart.productPrice * cart.quantity, 1, 2)}">¥0.00</td>
+                        <td class="col-op">
+                            <a th:href="@{/gouwuche/yichu/{id}(id=${cart.id})}" class="btn-text" style="color:#f44336;">删除</a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- 右侧结算面板 -->
+            <div class="cart-summary">
+                <h3>订单结算</h3>
+                <div class="summary-body">
+                    <!-- 满减提示 -->
+                    <div class="promo-tip" id="promoTip">
+                        🎁 满减优惠：满100减5元，满200减20元，满300减35元，满500减60元
+                    </div>
+                    <div class="summary-item">
+                        <span>已选商品</span>
+                        <span id="selectedCount">0件</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>商品总额</span>
+                        <span id="totalGoods">¥0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>满减优惠</span>
+                        <span class="discount" id="discount">-¥0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>配送费</span>
+                        <span id="shipFee">¥0.00</span>
+                    </div>
+                    <div class="summary-total">
+                        <span class="total-label">应付总额</span>
+                        <span class="total-price" id="totalPrice">¥0.00</span>
+                    </div>
+                </div>
+                <a href="javascript:void(0)" onclick="checkout()" class="btn-checkout">去结算</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <div class="front-footer">
+        <p>山野珍菌商城 &nbsp;|&nbsp; 品质保障 · 新鲜直达 &nbsp;|&nbsp; 客服热线：400-888-8888</p>
+        <p style="margin-top:6px;opacity:0.6;">云南野生菌专营 · 山珍美味 健康生活</p>
+    </div>
+
+    <script>
+        // 找到所在行
+        function findRow(el) {
+            var parent = el.parentNode;
+            while (parent && parent.tagName != 'TR') {
+                parent = parent.parentNode;
+            }
+            return parent;
+        }
+
+        // 数量加减 - 通过链接跳转更新
+        function changeQtyLink(cartId, delta) {
+            var rows = document.querySelectorAll('#cartBody .cart-item');
+            for (var i = 0; i < rows.length; i++) {
+                var id = rows[i].getAttribute('data-id');
+                if (id == cartId) {
+                    var input = rows[i].querySelector('.qty-input');
+                    var val = parseInt(input.value);
+                    if (isNaN(val) || val < 1) val = 1;
+                    val = val + delta;
+                    if (val < 1) val = 1;
+                    if (val > 99) val = 99;
+                    // 跳转到更新数量接口
+                    window.location.href = '/gouwuche/gengxin?id=' + cartId + '&quantity=' + val;
+                    return;
+                }
+            }
+        }
+
+        // 输入框输入时过滤非数字
+        function onQtyInput(input) {
+            var val = input.value.replace(/\D/g, '');
+            if (val == '') {
+                input.value = '';
+                return;
+            }
+            val = parseInt(val);
+            if (val > 99) val = 99;
+            input.value = val;
+        }
+
+        // 计算单行小计
+        function calcSub(el) {
+            var row = findRow(el);
+            if (row) {
+                var input = row.querySelector('.qty-input');
+                var qty = parseInt(input.value);
+                if (isNaN(qty) || qty < 1) qty = 1;
+                input.value = qty;
+                calcSubRow(row);
+                calcTotal();
+                // 如果数量改变了，跳转更新
+                var cartId = row.getAttribute('data-id');
+                if (cartId) {
+                    window.location.href = '/gouwuche/gengxin?id=' + cartId + '&quantity=' + qty;
+                }
+            }
+        }
+
+        // 计算单行小计（通过行对象）
+        function calcSubRow(row) {
+            var priceTd = row.querySelector('.col-price');
+            var input = row.querySelector('.qty-input');
+            var subTd = row.querySelector('.subtotal');
+            var price = parseFloat(priceTd.getAttribute('data-price'));
+            var qty = parseInt(input.value);
+            if (isNaN(qty) || qty < 1) qty = 1;
+            var sub = price * qty;
+            subTd.innerText = '¥' + sub.toFixed(2);
+        }
+
+        // 全选/取消全选
+        function toggleAll(el) {
+            var checks = document.querySelectorAll('#cartBody .item-check');
+            for (var i = 0; i < checks.length; i++) {
+                checks[i].checked = el.checked;
+            }
+            calcTotal();
+        }
+
+        // 计算合计
+        function calcTotal() {
+            var rows = document.querySelectorAll('#cartBody .cart-item');
+            var total = 0;
+            var count = 0;
+            for (var i = 0; i < rows.length; i++) {
+                var checked = rows[i].querySelector('.item-check').checked;
+                if (checked) {
+                    var subText = rows[i].querySelector('.subtotal').innerText;
+                    var sub = parseFloat(subText.replace('¥', ''));
+                    total = total + sub;
+                    var qty = parseInt(rows[i].querySelector('.qty-input').value);
+                    if (isNaN(qty)) qty = 1;
+                    count = count + qty;
+                }
+            }
+
+            // 多档满减
+            var discount = 0;
+            var nextTier = '';
+            if (total >= 500) {
+                discount = 60;
+            } else if (total >= 300) {
+                discount = 35;
+                nextTier = '再买' + (500 - total).toFixed(0) + '元可减60元';
+            } else if (total >= 200) {
+                discount = 20;
+                nextTier = '再买' + (300 - total).toFixed(0) + '元可减35元';
+            } else if (total >= 100) {
+                discount = 5;
+                nextTier = '再买' + (200 - total).toFixed(0) + '元可减20元';
+            } else {
+                nextTier = '再买' + (100 - total).toFixed(0) + '元可减5元';
+            }
+
+            var ship = total > 0 ? 10 : 0;
+            var finalTotal = total - discount + ship;
+
+            document.getElementById('selectedCount').innerText = count + '件';
+            document.getElementById('totalGoods').innerText = '¥' + total.toFixed(2);
+            document.getElementById('discount').innerText = '-¥' + discount.toFixed(2);
+            document.getElementById('shipFee').innerText = '¥' + ship.toFixed(2);
+            document.getElementById('totalPrice').innerText = '¥' + Math.max(0, finalTotal).toFixed(2);
+
+            // 更新满减提示
+            var promoTip = document.getElementById('promoTip');
+            if (total > 0 && nextTier) {
+                promoTip.innerHTML = '🎁 已减<strong>' + discount + '元</strong>，' + nextTier;
+            } else if (total == 0) {
+                promoTip.innerHTML = '🎁 满减优惠：满100减5元，满200减20元，满300减35元，满500减60元';
+            } else {
+                promoTip.innerHTML = '🎁 已享最高优惠，减<strong>' + discount + '元</strong>';
+            }
+        }
+
+        // 去结算
+        function checkout() {
+            var rows = document.querySelectorAll('#cartBody .cart-item');
+            var hasChecked = false;
+            for (var i = 0; i < rows.length; i++) {
+                if (rows[i].querySelector('.item-check').checked) {
+                    hasChecked = true;
+                    break;
+                }
+            }
+            if (!hasChecked) {
+                alert('请先选择要结算的商品');
+                return;
+            }
+            // 跳转到订单确认页
+            window.location.href = '/dingdan/confirm';
+        }
+
+        // 页面加载时计算一次
+        window.onload = function() {
+            calcTotal();
+        };
+    </script>
+</body>
+</html>

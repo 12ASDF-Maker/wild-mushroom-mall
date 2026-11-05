@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>商品管理</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- 侧边栏 -->
+        <div class="admin-sidebar">
+            <div class="sidebar-logo">商城后台</div>
+            <ul class="sidebar-menu">
+                <li><a th:href="@{/houtai}">后台首页</a></li>
+                <li><a th:href="@{/yonghu/list}">用户管理</a></li>
+                <li class="active"><a th:href="@{/shangpin/list}">商品管理</a></li>
+                <li><a th:href="@{/dingdan/list}">订单管理</a></li>
+                <li><a th:href="@{/guanggao/list}">广告管理</a></li>
+                <li><a th:href="@{/gouwuche/list}">购物车管理</a></li>
+                <li><a th:href="@{/dingzhi/list}">定制管理</a></li>
+                <li><a th:href="@{/xiaoxi/list}">私信管理</a></li>
+                <li><a th:href="@{/}">返回前台</a></li>
+            </ul>
+        </div>
+        <!-- 主区域 -->
+        <div class="admin-main">
+            <!-- 顶部Header -->
+            <div class="admin-header">
+                <span class="header-title">商品管理</span>
+                <input type="text" class="header-search" placeholder="搜索">
+                <div class="header-user">
+                    <span class="bell">🔔</span>
+                    <span class="user-name" th:text="${session.user != null ? session.user.nickname : '未登录'}">用户</span>
+                </div>
+            </div>
+            <!-- 内容区 -->
+            <div class="admin-content">
+                <!-- 表格容器 -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>商品列表</h3>
+                        <a th:href="@{/shangpin/add}" class="btn btn-primary btn-sm">+ 新增商品</a>
+                    </div>
+                    <div class="table-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>商品名称</th>
+                                    <th>分类</th>
+                                    <th>价格</th>
+                                    <th>库存</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="product : ${list}">
+                                    <td th:text="${product.id}">1</td>
+                                    <td th:text="${product.name}">商品名称</td>
+                                    <td>
+                                        <span class="tag tag-blue" th:text="${product.category}">分类</span>
+                                    </td>
+                                    <td style="color:#F57C00;font-weight:500;" th:text="'¥' + ${#numbers.formatDecimal(product.price, 1, 2)}">¥0.00</td>
+                                    <td th:text="${product.stock}">0</td>
+                                    <td>
+                                        <span th:if="${product.status == 1}" class="tag tag-green">上架</span>
+                                        <span th:if="${product.status == 0}" class="tag tag-gray">下架</span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/shangpin/edit/{id}(id=${product.id})}" class="btn btn-warning btn-sm">编辑</a>
+                                        <a th:href="@{/shangpin/delete/{id}(id=${product.id})}" class="btn btn-danger btn-sm" onclick="return confirm('确定删除该商品吗？')">删除</a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${list == null or list.isEmpty()}">
+                                    <td colspan="7" style="text-align:center;padding:30px;color:#999;">暂无商品数据</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>广告编辑</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="admin-layout">
+    <!-- 侧边栏 -->
+    <div class="admin-sidebar">
+        <div class="sidebar-logo">商城后台</div>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/yonghu/list}">用户管理</a></li>
+            <li><a th:href="@{/shangpin/list}">商品管理</a></li>
+            <li><a th:href="@{/dingdan/list}">订单管理</a></li>
+            <li class="active"><a th:href="@{/guanggao/list}">广告管理</a></li>
+            <li><a th:href="@{/gouwuche/list}">购物车管理</a></li>
+            <li><a th:href="@{/dingzhi/list}">定制管理</a></li>
+            <li><a th:href="@{/xiaoxi/list}">私信管理</a></li>
+            <li><a th:href="@{/}">返回前台</a></li>
+        </ul>
+    </div>
+    <!-- 主区域 -->
+    <div class="admin-main">
+        <div class="admin-header">
+            <span class="header-title" th:if="${ad != null and ad.id != null}">编辑广告</span>
+            <span class="header-title" th:if="${ad == null or ad.id == null}">新增广告</span>
+            <div class="header-user">
+                <span class="user-name" th:text="${session.user != null ? session.user.nickname : '未登录'}">用户</span>
+            </div>
+        </div>
+        <div class="admin-content">
+            <div class="edit-container">
+                <div th:if="${msg != null}" class="alert alert-danger">
+                    <span th:text="${msg}">错误信息</span>
+                </div>
+                <h2>
+                    <span th:if="${ad != null and ad.id != null}">编辑广告</span>
+                    <span th:if="${ad == null or ad.id == null}">新增广告</span>
+                </h2>
+                <form th:action="@{/guanggao/save}" th:object="${ad}" method="post" class="form-horizontal">
+                    <input type="hidden" th:field="*{id}" th:if="*{id != null}"/>
+                    <div class="form-group">
+                        <label>标题</label>
+                        <input type="text" class="form-control" th:field="*{title}" placeholder="请输入广告标题"/>
+                    </div>
+                    <div class="form-group">
+                        <label>图片地址</label>
+                        <input type="text" class="form-control" th:field="*{imageUrl}" placeholder="请输入图片地址"/>
+                    </div>
+                    <div class="form-group">
+                        <label>跳转链接</label>
+                        <input type="text" class="form-control" th:field="*{linkUrl}" placeholder="请输入跳转链接"/>
+                    </div>
+                    <div class="form-group">
+                        <label>位置</label>
+                        <input type="text" class="form-control" th:field="*{position}" placeholder="请输入展示位置"/>
+                    </div>
+                    <div class="form-group">
+                        <label>状态</label>
+                        <select class="form-control" th:field="*{status}">
+                            <option value="1">上架</option>
+                            <option value="0">下架</option>
+                        </select>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-primary">保存</button>
+                        <a th:href="@{/guanggao/list}" class="btn btn-default">返回</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

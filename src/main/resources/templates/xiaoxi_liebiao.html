@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>私信管理</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- 侧边栏 -->
+        <div class="admin-sidebar">
+            <div class="sidebar-logo">商城后台</div>
+            <ul class="sidebar-menu">
+                <li><a th:href="@{/houtai}">后台首页</a></li>
+                <li><a th:href="@{/yonghu/list}">用户管理</a></li>
+                <li><a th:href="@{/shangpin/list}">商品管理</a></li>
+                <li><a th:href="@{/dingdan/list}">订单管理</a></li>
+                <li><a th:href="@{/guanggao/list}">广告管理</a></li>
+                <li><a th:href="@{/gouwuche/list}">购物车管理</a></li>
+                <li><a th:href="@{/dingzhi/list}">定制管理</a></li>
+                <li class="active"><a th:href="@{/xiaoxi/list}">私信管理</a></li>
+                <li><a th:href="@{/}">返回前台</a></li>
+            </ul>
+        </div>
+        <!-- 主区域 -->
+        <div class="admin-main">
+            <!-- 顶部Header -->
+            <div class="admin-header">
+                <span class="header-title">私信管理</span>
+                <input type="text" class="header-search" placeholder="搜索">
+                <div class="header-user">
+                    <span class="bell">🔔</span>
+                    <span class="user-name" th:text="${session.user != null ? session.user.nickname : '未登录'}">用户</span>
+                </div>
+            </div>
+            <!-- 内容区 -->
+            <div class="admin-content">
+                <!-- 表格容器 -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>私信管理</h3>
+                        <a th:href="@{/xiaoxi/add}" class="btn btn-primary btn-sm">新增</a>
+                    </div>
+                    <div class="table-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>发送人ID</th>
+                                    <th>接收人ID</th>
+                                    <th>内容</th>
+                                    <th>是否已读</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="message : ${list}">
+                                    <td th:text="${message.id}">1</td>
+                                    <td th:text="${message.senderId}">0</td>
+                                    <td th:text="${message.receiverId}">0</td>
+                                    <td th:text="${message.content}">内容</td>
+                                    <td>
+                                        <span th:if="${message.isRead == 0}" class="tag tag-red">未读</span>
+                                        <span th:if="${message.isRead == 1}" class="tag tag-green">已读</span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/xiaoxi/edit/{id}(id=${message.id})}" class="btn btn-warning btn-sm">编辑</a>
+                                        <a th:href="@{/xiaoxi/delete/{id}(id=${message.id})}" class="btn btn-danger btn-sm" onclick="return confirm('确定删除吗？')">删除</a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${list == null or list.isEmpty()}">
+                                    <td colspan="6" style="text-align:center;">暂无数据</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 分页器 -->
+                    <div class="pagination">
+                        <span class="page-item">上一页</span>
+                        <span class="page-item active">1</span>
+                        <span class="page-item">下一页</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

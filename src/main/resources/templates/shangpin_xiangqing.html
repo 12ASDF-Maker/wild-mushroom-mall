@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>商品详情 - 山野珍菌商城</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .detail-layout {
+            width: 1200px;
+            margin: 20px auto;
+            display: flex;
+            gap: 30px;
+        }
+        .detail-img {
+            width: 480px;
+            height: 480px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .detail-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .detail-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .detail-info .detail-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        .detail-info .detail-desc {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+        .detail-info .detail-price-box {
+            background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+        }
+        .detail-info .detail-price {
+            font-size: 32px;
+            color: #F57C00;
+            font-weight: bold;
+        }
+        .detail-info .detail-price .price-symbol {
+            font-size: 18px;
+        }
+        .detail-info .detail-meta {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        .detail-info .detail-meta .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .detail-info .detail-meta .meta-label {
+            color: #999;
+        }
+        .detail-qty-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .detail-qty-row .qty-label {
+            font-size: 14px;
+            color: #666;
+        }
+        .detail-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .detail-actions .btn {
+            padding: 12px 36px;
+            font-size: 15px;
+        }
+        .detail-desc-box {
+            width: 1200px;
+            margin: 0 auto 40px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            padding: 30px;
+        }
+        .detail-desc-box h3 {
+            font-size: 18px;
+            color: #1B5E20;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .detail-desc-box .desc-content {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.8;
+        }
+        .breadcrumb {
+            width: 1200px;
+            margin: 20px auto 0;
+            font-size: 13px;
+            color: #999;
+        }
+        .breadcrumb a { color: #1B5E20; }
+        .breadcrumb .sep { margin: 0 6px; color: #ccc; }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="front-nav">
+        <div class="nav-inner">
+            <a class="logo" th:href="@{/}">山野珍菌商城</a>
+            <ul class="menu">
+                <li><a th:href="@{/}">首页</a></li>
+                <li><a th:href="@{/fenlei}">商品分类</a></li>
+                <li><a th:href="@{/gouwuche/view}">购物车</a></li>
+                <li><a th:href="@{/wodeDingdan}">我的订单</a></li>
+            </ul>
+            <div class="search-wrap">
+                <input type="text" class="search-box" placeholder="搜索商品">
+                <button class="search-btn">搜索</button>
+            </div>
+            <div class="user-area">
+                <span th:if="${session.user != null}" th:text="${session.user.nickname != null ? session.user.nickname : session.user.username}">用户名</span>
+                <a th:if="${session.user != null and session.user.role == 'admin'}" th:href="@{/houtai}" class="btn-text">后台管理</a>
+                <a th:if="${session.user != null}" th:href="@{/tuichu}" class="btn-text">退出</a>
+                <a th:if="${session.user == null}" th:href="@{/denglu}" class="btn-text">登录</a>
+                <a th:if="${session.user == null}" th:href="@{/zhuce}" class="btn-text">注册</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 面包屑 -->
+    <div class="breadcrumb">
+        <a th:href="@{/}">首页</a>
+        <span class="sep">></span>
+        <a th:href="@{/fenlei}">商品分类</a>
+        <span class="sep">></span>
+        <a th:href="@{|/fenlei?cat=${product.category}|}" th:text="${product.category}">分类</a>
+        <span class="sep">></span>
+        <span th:text="${product.name}">商品名称</span>
+    </div>
+
+    <!-- 商品详情 -->
+    <div class="detail-layout">
+        <!-- 左侧图片 -->
+        <div class="detail-img">
+            <span th:if="${product.imageUrl == null or product.imageUrl == ''}">🍄</span>
+            <img th:if="${product.imageUrl != null and product.imageUrl != ''}" th:src="${product.imageUrl}" alt="">
+        </div>
+        <!-- 右侧信息 -->
+        <div class="detail-info">
+            <div class="detail-name" th:text="${product.name}">商品名称</div>
+            <div class="detail-desc" th:text="${product.description}">商品描述</div>
+            <div class="detail-price-box">
+                <span class="detail-price">
+                    <span class="price-symbol">¥</span>
+                    <span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">0.00</span>
+                </span>
+            </div>
+            <div class="detail-meta">
+                <div class="meta-item">
+                    <span class="meta-label">分类：</span>
+                    <span th:text="${product.category}">分类</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">库存：</span>
+                    <span th:if="${product.stock != null and product.stock > 0}" th:text="${product.stock} + '件'">0件</span>
+                    <span th:if="${product.stock == null or product.stock <= 0}" style="color:#f44336;">暂时缺货</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">状态：</span>
+                    <span th:if="${product.status == 1}" style="color:#4CAF50;">在售</span>
+                    <span th:if="${product.status == 0}" style="color:#999;">已下架</span>
+                </div>
+            </div>
+            <!-- 数量选择 -->
+            <div class="detail-qty-row">
+                <span class="qty-label">数量：</span>
+                <div class="qty-stepper">
+                    <button type="button" class="qty-btn" onclick="changeQty(-1)">-</button>
+                    <input type="text" class="qty-input" id="qtyInput" value="1" oninput="onQtyInput(this)">
+                    <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
+                </div>
+            </div>
+            <!-- 操作按钮 -->
+            <div class="detail-actions">
+                <a class="btn btn-warning" th:href="@{/gouwuche/jiaru(productId=${product.id})}" onclick="return confirmAddCart()">加入购物车</a>
+                <a class="btn btn-default" th:href="@{/gouwuche/jiaru(productId=${product.id})}" onclick="return goCheckout()">立即购买</a>
+                <a class="btn btn-default" th:href="@{/xiaoxi/liaotian}">联系卖家</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 商品描述详情 -->
+    <div class="detail-desc-box">
+        <h3>商品详情</h3>
+        <div class="desc-content">
+            <p th:text="${product.description}" style="margin-bottom:12px;">商品描述内容</p>
+            <p style="margin-bottom:8px;">本品精选云南高原野生菌，产地直供，品质优良。</p>
+            <p style="margin-bottom:8px;">储存方法：置于阴凉干燥处，避免阳光直射，开封后请密封保存。</p>
+            <p style="margin-bottom:8px;">食用方法：温水泡发后可炒、炖、煲汤，风味鲜美，营养丰富。</p>
+            <p>温馨提示：野生菌请充分烹饪后食用，如有过敏史请谨慎食用。</p>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <div class="front-footer">
+        <p>山野珍菌商城 &nbsp;|&nbsp; 品质保障 · 新鲜直达 &nbsp;|&nbsp; 客服热线：400-888-8888</p>
+        <p style="margin-top:6px;opacity:0.6;">云南野生菌专营 · 山珍美味 健康生活</p>
+    </div>
+
+    <script>
+        // 数量加减
+        function changeQty(delta) {
+            var input = document.getElementById('qtyInput');
+            var val = parseInt(input.value);
+            if (isNaN(val) || val < 1) val = 1;
+            val = val + delta;
+            if (val < 1) val = 1;
+            if (val > 99) val = 99;
+            input.value = val;
+        }
+
+        // 输入框过滤
+        function onQtyInput(input) {
+            var val = input.value.replace(/\D/g, '');
+            if (val == '') { input.value = ''; return; }
+            val = parseInt(val);
+            if (val > 99) val = 99;
+            if (val < 1) val = 1;
+            input.value = val;
+        }
+
+        // 加入购物车确认
+        function confirmAddCart() {
+            return true;
+        }
+
+        // 立即购买 - 先加入购物车再跳转结算
+        function goCheckout() {
+            window.location.href = '/dingdan/confirm';
+            return false;
+        }
+    </script>
+</body>
+</html>

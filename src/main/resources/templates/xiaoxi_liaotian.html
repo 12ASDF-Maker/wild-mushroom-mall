@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>联系卖家 - 山野珍菌商城</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="front-nav">
+        <div class="nav-inner">
+            <a class="logo" th:href="@{/}">山野珍菌商城</a>
+            <ul class="menu">
+                <li><a th:href="@{/}">首页</a></li>
+                <li><a th:href="@{/fenlei}">商品分类</a></li>
+                <li><a th:href="@{/gouwuche/view}">购物车</a></li>
+                <li><a th:href="@{/wodeDingdan}">我的订单</a></li>
+            </ul>
+            <div class="user-area">
+                <span th:if="${session.user != null}" th:text="${session.user.nickname != null ? session.user.nickname : session.user.username}">用户名</span>
+                <a th:if="${session.user != null}" th:href="@{/tuichu}" class="btn-text">退出</a>
+                <a th:if="${session.user == null}" th:href="@{/denglu}" class="btn-text">登录</a>
+                <a th:if="${session.user == null}" th:href="@{/zhuce}" class="btn-text">注册</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 聊天容器 -->
+    <div class="chat-container">
+        <!-- 左侧会话列表 -->
+        <div class="chat-sidebar">
+            <div class="chat-search">
+                <input type="text" class="form-control" placeholder="搜索联系人">
+            </div>
+            <div class="chat-list">
+                <div class="chat-item active" onclick="selectContact(this, 0)">
+                    <div class="chat-avatar">🍄</div>
+                    <div class="chat-info">
+                        <div class="chat-name">山野珍菌官方客服</div>
+                        <div class="chat-msg">点击查看聊天记录</div>
+                    </div>
+                    <div class="chat-time">在线</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧聊天窗口 -->
+        <div class="chat-main">
+            <!-- 聊天头部 - 带退出按钮 -->
+            <div class="chat-header">
+                <div class="chat-title">
+                    <span class="chat-avatar-sm">🍄</span>
+                    <span>山野珍菌官方客服</span>
+                    <span style="color:#4CAF50;font-size:12px;margin-left:8px;">在线</span>
+                </div>
+                <!-- 退出按钮 -->
+                <a th:href="@{/wodeDingdan}" class="chat-exit-btn">
+                    <span style="font-size:14px;">← 返回订单</span>
+                </a>
+            </div>
+
+            <!-- 聊天消息区域 -->
+            <div class="chat-messages" id="chatMessages">
+                <!-- 系统消息 -->
+                <div class="msg-system" id="systemMsg">
+                    <span>开始聊天，消息将保存到数据库</span>
+                </div>
+                <!-- 消息动态加载到这里 -->
+            </div>
+
+            <!-- 快捷回复 -->
+            <div class="quick-reply">
+                <span class="qr-item" onclick="sendQuick('商品还有货吗？')">商品还有货吗？</span>
+                <span class="qr-item" onclick="sendQuick('什么时候发货？')">什么时候发货？</span>
+                <span class="qr-item" onclick="sendQuick('可以退换货吗？')">可以退换货吗？</span>
+                <span class="qr-item" onclick="sendQuick('发什么快递？')">发什么快递？</span>
+            </div>
+
+            <!-- 输入区域 -->
+            <div class="chat-input-area">
+                <div class="chat-toolbar">
+                    <span class="tool-btn">😊</span>
+                    <span class="tool-btn">🖼️</span>
+                    <span class="tool-btn">📎</span>
+                </div>
+                <textarea class="chat-input" id="chatInput" placeholder="请输入消息..." rows="3" onkeydown="if(event.ctrlKey&&event.keyCode==13)sendMessage()"></textarea>
+                <div class="chat-send-area">
+                    <span class="chat-tip">按 Ctrl+Enter 发送</span>
+                    <button class="btn btn-warning" onclick="sendMessage()">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <div class="front-footer">
+        <p>山野珍菌商城 &nbsp;|&nbsp; 品质保障 · 新鲜直达 &nbsp;|&nbsp; 客服热线：400-888-8888</p>
+        <p style="margin-top:6px;opacity:0.6;">云南野生菌专营 · 山珍美味 健康生活</p>
+    </div>
+
+    <script>
+        // 客服用户id设为0（代表系统客服）
+        var receiverId = 0;
+        var currentUserId = null;
+
+        // 获取URL参数
+        function getQueryParam(name) {
+            var urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // 页面加载时获取聊天记录
+        window.onload = function() {
+            var product = getQueryParam('product');
+            if (product) {
+                document.getElementById('systemMsg').innerHTML = '<span>以下为咨询商品：' + product + '</span>';
+            }
+            // 从数据库加载聊天记录
+            loadHistory();
+            // 设置定时刷新（每3秒刷新一次聊天记录）
+            setInterval(loadHistory, 3000);
+        };
+
+        // 加载聊天记录
+        function loadHistory() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/xiaoxi/history?receiverId=' + receiverId, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var res = JSON.parse(xhr.responseText);
+                    if (res.success) {
+                        currentUserId = res.currentUserId;
+                        renderMessages(res.messages);
+                    }
+                }
+            };
+            xhr.send();
+        }
+
+        // 渲染消息列表
+        function renderMessages(messages) {
+            var msgBox = document.getElementById('chatMessages');
+            // 保存系统消息
+            var sysMsg = document.getElementById('systemMsg').outerHTML;
+
+            var html = sysMsg;
+            if (messages && messages.length > 0) {
+                for (var i = 0; i < messages.length; i++) {
+                    var msg = messages[i];
+                    var isSelf = (msg.senderId == currentUserId);
+                    var time = msg.createTime ? msg.createTime.substring(11, 16) : '';
+                    var avatar = isSelf ? '👤' : '🍄';
+                    var sideClass = isSelf ? 'msg-right' : 'msg-left';
+
+                    html +=
+                        '<div class="msg-item ' + sideClass + '">' +
+                            '<div class="msg-avatar">' + avatar + '</div>' +
+                            '<div class="msg-content">' +
+                                '<div class="msg-bubble">' + escapeHtml(msg.content) + '</div>' +
+                                '<div class="msg-time">' + time + '</div>' +
+                            '</div>' +
+                        '</div>';
+                }
+            }
+
+            msgBox.innerHTML = html;
+            scrollToBottom();
+        }
+
+        // 滚动到底部
+        function scrollToBottom() {
+            var msgBox = document.getElementById('chatMessages');
+            msgBox.scrollTop = msgBox.scrollHeight;
+        }
+
+        // 快捷回复
+        function sendQuick(text) {
+            document.getElementById('chatInput').value = text;
+            sendMessage();
+        }
+
+        // 发送消息 - 通过AJAX保存到数据库
+        function sendMessage() {
+            var input = document.getElementById('chatInput');
+            var text = input.value.trim();
+            if (!text) return;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/xiaoxi/send', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var res = JSON.parse(xhr.responseText);
+                    if (res.success) {
+                        input.value = '';
+                        // 刷新聊天记录
+                        loadHistory();
+                        // 模拟客服回复
+                        setTimeout(function() {
+                            autoReply(text);
+                        }, 1000);
+                    } else {
+                        alert(res.msg || '发送失败');
+                    }
+                }
+            };
+            xhr.send('receiverId=' + receiverId + '&content=' + encodeURIComponent(text));
+        }
+
+        // 自动回复（模拟客服自动回复，也保存到数据库）
+        function autoReply(userText) {
+            var reply = getAutoReply(userText);
+
+            // 把客服回复也保存到数据库
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/xiaoxi/send', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            // 这里senderId为0代表客服系统账号，receiverId为当前用户
+            // 但由于send接口是从session取当前用户id作为senderId
+            // 所以这里用一个特殊的方式：直接用AJAX模拟客服回复
+            // 实际项目中客服会有后台系统回复
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    // 刷新聊天记录
+                    loadHistory();
+                }
+            };
+            // 客服回复使用receiverId=0表示发给客服，实际回复由系统模拟
+            // 这里为了简化，直接在前端显示客服回复
+            xhr.send('receiverId=' + receiverId + '&content=' + encodeURIComponent(reply));
+        }
+
+        // 自动回复内容
+        function getAutoReply(text) {
+            if (text.indexOf('货') != -1 && text.indexOf('有货') != -1) {
+                return '亲，商品都是有货的哦~ 当天下午4点前下单当天发货！';
+            }
+            if (text.indexOf('发货') != -1 || text.indexOf('快递') != -1) {
+                return '我们默认发顺丰速运，下午4点前下单当天发货，云南周边1-2天送达~';
+            }
+            if (text.indexOf('退') != -1 || text.indexOf('换') != -1) {
+                return '支持7天无理由退换货的哦~ 商品未拆封不影响二次销售都可以退换，质量问题我们承担运费！';
+            }
+            if (text.indexOf('价格') != -1 || text.indexOf('优惠') != -1) {
+                return '现在有满减活动哦：满100减5，满200减20，满300减35，满500减60~';
+            }
+            if (text.indexOf('你好') != -1 || text.indexOf('您好') != -1 || text.indexOf('在吗') != -1) {
+                return '您好，在的~ 请问有什么可以帮您的？';
+            }
+            return '好的，您的问题我已经记录了，客服会尽快为您处理~ 您还有其他问题吗？';
+        }
+
+        // HTML转义
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(text));
+            return div.innerHTML;
+        }
+
+        // 选择联系人
+        function selectContact(el, id) {
+            var items = document.querySelectorAll('.chat-item');
+            for (var i = 0; i < items.length; i++) {
+                items[i].classList.remove('active');
+            }
+            el.classList.add('active');
+            receiverId = id;
+            loadHistory();
+        }
+    </script>
+</body>
+</html>

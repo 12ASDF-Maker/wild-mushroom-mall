@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>定制需求编辑</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="admin-layout">
+    <!-- 侧边栏 -->
+    <div class="admin-sidebar">
+        <div class="sidebar-logo">商城后台</div>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/yonghu/list}">用户管理</a></li>
+            <li><a th:href="@{/shangpin/list}">商品管理</a></li>
+            <li><a th:href="@{/dingdan/list}">订单管理</a></li>
+            <li><a th:href="@{/guanggao/list}">广告管理</a></li>
+            <li><a th:href="@{/gouwuche/list}">购物车管理</a></li>
+            <li class="active"><a th:href="@{/dingzhi/list}">定制管理</a></li>
+            <li><a th:href="@{/xiaoxi/list}">私信管理</a></li>
+            <li><a th:href="@{/}">返回前台</a></li>
+        </ul>
+    </div>
+    <!-- 主区域 -->
+    <div class="admin-main">
+        <div class="admin-header">
+            <span class="header-title" th:if="${custom != null and custom.id != null}">编辑定制需求</span>
+            <span class="header-title" th:if="${custom == null or custom.id == null}">新增定制需求</span>
+            <div class="header-user">
+                <span class="user-name" th:text="${session.user != null ? session.user.nickname : '未登录'}">用户</span>
+            </div>
+        </div>
+        <div class="admin-content">
+            <div class="edit-container">
+                <div th:if="${msg != null}" class="alert alert-danger">
+                    <span th:text="${msg}">错误信息</span>
+                </div>
+                <h2>
+                    <span th:if="${custom != null and custom.id != null}">编辑定制需求</span>
+                    <span th:if="${custom == null or custom.id == null}">新增定制需求</span>
+                </h2>
+                <form th:action="@{/dingzhi/save}" th:object="${custom}" method="post" class="form-horizontal">
+                    <input type="hidden" th:field="*{id}" th:if="*{id != null}"/>
+                    <div class="form-group">
+                        <label>用户ID</label>
+                        <input type="number" class="form-control" th:field="*{userId}" placeholder="请输入用户ID"/>
+                    </div>
+                    <div class="form-group">
+                        <label>定制商品名</label>
+                        <input type="text" class="form-control" th:field="*{productName}" placeholder="请输入定制商品名"/>
+                    </div>
+                    <div class="form-group">
+                        <label>需求描述</label>
+                        <textarea class="form-control" th:field="*{description}" rows="3" placeholder="请输入定制需求描述"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>联系电话</label>
+                        <input type="text" class="form-control" th:field="*{phone}" placeholder="请输入联系电话"/>
+                    </div>
+                    <div class="form-group">
+                        <label>状态</label>
+                        <select class="form-control" th:field="*{status}">
+                            <option value="待处理">待处理</option>
+                            <option value="处理中">处理中</option>
+                            <option value="已完成">已完成</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>回复</label>
+                        <textarea class="form-control" th:field="*{reply}" rows="3" placeholder="请输入回复"></textarea>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-primary">保存</button>
+                        <a th:href="@{/dingzhi/list}" class="btn btn-default">返回</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

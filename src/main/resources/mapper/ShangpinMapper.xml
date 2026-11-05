@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 商品表Mapper映射文件，对应ShangpinMapper接口 -->
+<mapper namespace="com.shop.mapper.ShangpinMapper">
+
+    <!-- 查询全部商品信息 -->
+    <select id="chaxunQuanbu" resultType="com.shop.entity.Shangpin">
+        SELECT id, name, price, stock, description, image_url, status, category
+        FROM `shangpin`
+        ORDER BY id DESC
+    </select>
+
+    <!-- 查询上架的商品 -->
+    <select id="chaxunShangjia" resultType="com.shop.entity.Shangpin">
+        SELECT id, name, price, stock, description, image_url, status, category
+        FROM `shangpin`
+        WHERE status = 1
+        ORDER BY id DESC
+    </select>
+
+    <!-- 根据分类查询上架商品 -->
+    <select id="chaxunByFenlei" resultType="com.shop.entity.Shangpin">
+        SELECT id, name, price, stock, description, image_url, status, category
+        FROM `shangpin`
+        WHERE status = 1 AND category = #{category}
+        ORDER BY id DESC
+    </select>
+
+    <!-- 根据商品id查询商品信息 -->
+    <select id="chaxunById" resultType="com.shop.entity.Shangpin">
+        SELECT id, name, price, stock, description, image_url, status, category
+        FROM `shangpin`
+        WHERE id = #{id}
+    </select>
+
+    <!-- 新增商品信息，id为自增主键不插入 -->
+    <insert id="tianjia">
+        INSERT INTO `shangpin` (name, price, stock, description, image_url, status, category)
+        VALUES (#{name}, #{price}, #{stock}, #{description}, #{imageUrl}, #{status}, #{category})
+    </insert>
+
+    <!-- 修改商品信息，根据id更新 -->
+    <update id="xiugai">
+        UPDATE `shangpin`         SET name = #{name},
+            price = #{price},
+            stock = #{stock},
+            description = #{description},
+            image_url = #{imageUrl},
+            status = #{status},
+            category = #{category}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据商品id删除商品信息 -->
+    <delete id="shanchuById">
+        DELETE FROM `shangpin`
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 减少库存 -->
+    <update id="jianshaoKucun">
+        UPDATE `shangpin`         SET stock = stock - #{quantity}
+        WHERE id = #{id} AND stock >= #{quantity}
+    </update>
+
+    <!-- 增加库存 -->
+    <update id="zengjiaKucun">
+        UPDATE `shangpin`         SET stock = stock + #{quantity}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- 侧边栏 -->
+        <div class="admin-sidebar">
+            <div class="sidebar-logo">商城后台</div>
+            <ul class="sidebar-menu">
+                <li><a th:href="@{/houtai}">后台首页</a></li>
+                <li class="active"><a th:href="@{/yonghu/list}">用户管理</a></li>
+                <li><a th:href="@{/shangpin/list}">商品管理</a></li>
+                <li><a th:href="@{/dingdan/list}">订单管理</a></li>
+                <li><a th:href="@{/guanggao/list}">广告管理</a></li>
+                <li><a th:href="@{/gouwuche/list}">购物车管理</a></li>
+                <li><a th:href="@{/dingzhi/list}">定制管理</a></li>
+                <li><a th:href="@{/xiaoxi/list}">私信管理</a></li>
+                <li><a th:href="@{/}">返回前台</a></li>
+            </ul>
+        </div>
+        <!-- 主区域 -->
+        <div class="admin-main">
+            <!-- 顶部Header -->
+            <div class="admin-header">
+                <span class="header-title">用户管理</span>
+                <input type="text" class="header-search" placeholder="搜索">
+                <div class="header-user">
+                    <span class="bell">🔔</span>
+                    <span class="user-name" th:text="${session.user != null ? session.user.nickname : '未登录'}">用户</span>
+                </div>
+            </div>
+            <!-- 内容区 -->
+            <div class="admin-content">
+                <!-- 表格容器 -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>用户管理</h3>
+                        <a th:href="@{/yonghu/add}" class="btn btn-primary btn-sm">新增</a>
+                    </div>
+                    <div class="table-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>用户名</th>
+                                    <th>昵称</th>
+                                    <th>手机号</th>
+                                    <th>角色</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="user : ${list}">
+                                    <td th:text="${user.id}">1</td>
+                                    <td th:text="${user.username}">用户名</td>
+                                    <td th:text="${user.nickname}">昵称</td>
+                                    <td th:text="${user.phone}">手机号</td>
+                                    <td>
+                                        <span th:if="${user.role == 'admin'}" class="tag tag-green">管理员</span>
+                                        <span th:if="${user.role != 'admin'}" class="tag tag-blue">普通用户</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${user.status == 1}" class="tag tag-green">启用</span>
+                                        <span th:if="${user.status == 0}" class="tag tag-gray">禁用</span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/yonghu/edit/{id}(id=${user.id})}" class="btn btn-warning btn-sm">编辑</a>
+                                        <a th:href="@{/yonghu/delete/{id}(id=${user.id})}" class="btn btn-danger btn-sm" onclick="return confirm('确定删除吗？')">删除</a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${list == null or list.isEmpty()}">
+                                    <td colspan="7" style="text-align:center;">暂无数据</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 分页器 -->
+                    <div class="pagination">
+                        <span class="page-item">上一页</span>
+                        <span class="page-item active">1</span>
+                        <span class="page-item">下一页</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 订单表Mapper映射文件，对应DingdanMapper接口 -->
+<mapper namespace="com.shop.mapper.DingdanMapper">
+
+    <!-- 查询全部订单信息 -->
+    <select id="chaxunQuanbu" resultType="com.shop.entity.Dingdan">
+        SELECT id, order_no, user_id, total_amount, status, receiver_name, receiver_phone, receiver_address, create_time
+        FROM `dingdan`
+        ORDER BY id DESC
+    </select>
+
+    <!-- 根据用户id查询订单 -->
+    <select id="chaxunByYonghuId" resultType="com.shop.entity.Dingdan">
+        SELECT id, order_no, user_id, total_amount, status, receiver_name, receiver_phone, receiver_address, create_time
+        FROM `dingdan`
+        WHERE user_id = #{userId}
+        ORDER BY id DESC
+    </select>
+
+    <!-- 根据订单编号查询订单 -->
+    <select id="chaxunByDingdanNo" resultType="com.shop.entity.Dingdan">
+        SELECT id, order_no, user_id, total_amount, status, receiver_name, receiver_phone, receiver_address, create_time
+        FROM `dingdan`
+        WHERE order_no = #{orderNo}
+    </select>
+
+    <!-- 根据订单id查询订单信息 -->
+    <select id="chaxunById" resultType="com.shop.entity.Dingdan">
+        SELECT id, order_no, user_id, total_amount, status, receiver_name, receiver_phone, receiver_address, create_time
+        FROM `dingdan`
+        WHERE id = #{id}
+    </select>
+
+    <!-- 新增订单信息，id为自增主键不插入 -->
+    <insert id="tianjia">
+        INSERT INTO `dingdan` (order_no, user_id, total_amount, status, receiver_name, receiver_phone, receiver_address, create_time)
+        VALUES (#{orderNo}, #{userId}, #{totalAmount}, #{status}, #{receiverName}, #{receiverPhone}, #{receiverAddress}, #{createTime})
+    </insert>
+
+    <!-- 修改订单信息，根据id更新 -->
+    <update id="xiugai">
+        UPDATE `dingdan`         SET order_no = #{orderNo},
+            user_id = #{userId},
+            total_amount = #{totalAmount},
+            status = #{status},
+            receiver_name = #{receiverName},
+            receiver_phone = #{receiverPhone},
+            receiver_address = #{receiverAddress}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据订单id删除订单信息 -->
+    <delete id="shanchuById">
+        DELETE FROM `dingdan`
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 修改订单状态，根据订单id更新订单状态 -->
+    <update id="xiugaiZhuangtai">
+        UPDATE `dingdan`         SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+</mapper>
